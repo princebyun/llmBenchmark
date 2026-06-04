@@ -86,6 +86,19 @@ def render():
             text-overflow: clip !important;
             max-width: none !important;
         }
+        /* 스피너(로딩)를 화면 중앙 팝업 모달 스타일로 변경 */
+        div[data-testid="stSpinner"] {
+            position: fixed !important;
+            top: 50% !important;
+            left: 50% !important;
+            transform: translate(-50%, -50%) !important;
+            background-color: var(--secondary-background-color) !important;
+            padding: 30px 40px !important;
+            border-radius: 12px !important;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.3) !important;
+            z-index: 99999 !important;
+            border: 1px solid var(--border-color) !important;
+        }
         </style>
         """, unsafe_allow_html=True)
         
