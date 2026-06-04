@@ -30,7 +30,7 @@ st.title("🚀 로컬 LLM 하드웨어 벤치마크 및 진단")
 st.markdown("Ollama, LM Studio, vLLM, oMLX 등에 설치된 모델을 감지하고 내 PC의 성능(TPS)을 글로벌 기준과 비교합니다.")
 
 with st.sidebar:
-    st.markdown("<h2 style='text-align: center; color: #ff4b4b; font-weight: 800; font-size: 26px;'>LLM Benchmark</h2>", unsafe_allow_html=True)
+    st.markdown("<h2 style='text-align: center; color: #4F46E5; font-weight: 800; font-size: 26px;'>LLM Benchmark</h2>", unsafe_allow_html=True)
     st.markdown("<p style='text-align: center; color: #666; font-size: 13px; margin-top: -10px;'>내 PC 하드웨어 한계 돌파</p>", unsafe_allow_html=True)
     st.markdown("<hr style='margin: 10px 0px 20px 0px;'>", unsafe_allow_html=True)
     
@@ -56,9 +56,9 @@ with st.sidebar:
         default_index=0,
         styles={
             "container": {"padding": "0!important", "background-color": "transparent"},
-            "icon": {"color": "#ff4b4b", "font-size": "18px"}, 
-            "nav-link": {"font-size": "15px", "text-align": "left", "margin":"5px 0px", "--hover-color": "#f0f2f6", "font-weight": "600"},
-            "nav-link-selected": {"background-color": "#ff4b4b", "color": "white", "font-weight": "700"},
+            "icon": {"color": "#4F46E5", "font-size": "18px"}, 
+            "nav-link": {"font-size": "15px", "text-align": "left", "margin":"5px 0px", "--hover-color": "#F1F5F9", "font-weight": "600"},
+            "nav-link-selected": {"background-color": "#4F46E5", "color": "white", "font-weight": "700"},
         }
     )
 
