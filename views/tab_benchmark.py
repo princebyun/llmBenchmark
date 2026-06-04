@@ -9,8 +9,23 @@ from charts import draw_gauge_chart
 def render():
     st.subheader("진단 환경 설정")
     
-    target_ip = st.text_input("🎯 벤치마크할 기기의 IP 주소", value="localhost")
-    st.caption("외부 기기를 벤치마크하려면 해당 기기의 IP(예: 192.168.0.x)를 입력하세요. (단, 해당 기기의 LLM 프로그램(Ollama, LM Studio, vLLM, oMLX 등) 외부 접속이 허용되어 있어야 합니다.)")
+    if "target_ip" not in st.session_state:
+        st.session_state.target_ip = "localhost"
+        
+    col1, col2 = st.columns([4, 1])
+    with col1:
+        target_ip_input = st.text_input("🎯 벤치마크할 기기의 IP 주소", value=st.session_state.target_ip)
+    with col2:
+        st.write("") 
+        st.write("") 
+        if st.button("적용 및 새로고침", use_container_width=True):
+            st.session_state.target_ip = target_ip_input
+            if "available_models" in st.session_state:
+                del st.session_state["available_models"]
+                
+    target_ip = st.session_state.target_ip
+    
+    st.caption("외부 기기를 벤치마크하려면 해당 기기의 IP(예: 192.168.0.x)를 입력 후 '적용'을 누르세요. (단, 해당 기기의 LLM 프로그램(Ollama, LM Studio, vLLM, oMLX 등) 외부 접속이 허용되어 있어야 합니다.)")
     
     with st.expander("💡 외부 기기 접속 허용 설정 방법 보기"):
         st.markdown("""
@@ -29,7 +44,11 @@ def render():
         - 서버 실행 명령어에 `--host 0.0.0.0` 옵션을 추가하여 실행하거나, 앱 내 네트워크 설정에서 외부 접속을 허용해 주세요.
         """)
     
-    available_models = get_all_models(target_ip)
+    if "available_models" not in st.session_state:
+        with st.spinner("🤖 모델 목록을 스캔하고 있습니다... 잠시만 기다려주세요"):
+            st.session_state.available_models = get_all_models(target_ip)
+            
+    available_models = st.session_state.available_models
     
     if not available_models:
         st.warning(f"'{target_ip}'에서 감지된 로컬 모델이 없습니다. 서버가 실행 중인지, 외부 접속이 허용되어 있는지 확인해 주세요.")
