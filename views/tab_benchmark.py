@@ -55,9 +55,10 @@ def render():
         if target_ip.strip() == "":
             st.session_state.available_models = []
         else:
-            with st.spinner("🤖 모델 목록을 스캔하고 있습니다... 잠시만 기다려주세요"):
-                st.session_state.available_models = get_all_models(target_ip)
-            
+            popup = st.empty()
+            popup.markdown(show_custom_spinner("🤖 모델 목록을 스캔하고 있습니다... 잠시만 기다려주세요"), unsafe_allow_html=True)
+            st.session_state.available_models = get_all_models(target_ip)
+            popup.empty()
     available_models = st.session_state.available_models
     
     if not available_models:
@@ -86,21 +87,56 @@ def render():
             text-overflow: clip !important;
             max-width: none !important;
         }
-        /* 스피너(로딩)를 화면 중앙 팝업 모달 스타일로 변경 */
-        div[data-testid="stSpinner"] {
-            position: fixed !important;
-            top: 50% !important;
-            left: 50% !important;
-            transform: translate(-50%, -50%) !important;
-            background-color: var(--secondary-background-color) !important;
-            padding: 30px 40px !important;
-            border-radius: 12px !important;
-            box-shadow: 0 10px 40px rgba(0,0,0,0.3) !important;
-            z-index: 99999 !important;
-            border: 1px solid var(--border-color) !important;
-        }
         </style>
         """, unsafe_allow_html=True)
+        
+        def show_custom_spinner(text):
+            return f"""
+            <style>
+            .custom-popup-overlay {{
+                position: fixed;
+                top: 0; left: 0; width: 100vw; height: 100vh;
+                background-color: rgba(0, 0, 0, 0.4);
+                z-index: 999999;
+                display: flex;
+                justify-content: center;
+                align-items: center;
+                backdrop-filter: blur(3px);
+            }}
+            .custom-popup-content {{
+                background-color: var(--secondary-background-color, #ffffff);
+                padding: 40px 60px;
+                border-radius: 16px;
+                box-shadow: 0 10px 40px rgba(0,0,0,0.3);
+                text-align: center;
+                border: 1px solid var(--border-color, #e0e0e0);
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+                gap: 20px;
+            }}
+            .spinner-circle {{
+                width: 50px;
+                height: 50px;
+                border: 5px solid var(--primary-color, #ff4b4b);
+                border-bottom-color: transparent;
+                border-radius: 50%;
+                display: inline-block;
+                box-sizing: border-box;
+                animation: rotation 1s linear infinite;
+            }}
+            @keyframes rotation {{
+                0% {{ transform: rotate(0deg); }}
+                100% {{ transform: rotate(360deg); }}
+            }}
+            </style>
+            <div class="custom-popup-overlay">
+                <div class="custom-popup-content">
+                    <div class="spinner-circle"></div>
+                    <h3 style="margin:0;">{text}</h3>
+                </div>
+            </div>
+            """
         
         selected_options = st.multiselect(
             "진단할 모델 (여러 개 선택 시 순차적으로 자동 벤치마크합니다):", 
@@ -128,9 +164,13 @@ def render():
                     status_text.info(f"[{i+1}/{len(selected_options)}] **{selected_model_info['name']}** 벤치마크 진행 중...")
                     
                     progress_placeholder = st.empty()
-                    with st.spinner(f"'{selected_model_info['name']}' 성능 측정 중... 잠시만 기다려주세요"):
-                        result = benchmark_model(selected_model_info, target_ip, prompt_text, progress_placeholder)
+                    
+                    popup = st.empty()
+                    popup.markdown(show_custom_spinner(f"'{selected_model_info['name']}' 성능 측정 중... 잠시만 기다려주세요"), unsafe_allow_html=True)
+                    
+                    result = benchmark_model(selected_model_info, target_ip, prompt_text, progress_placeholder)
                         
+                    popup.empty()
                     progress_placeholder.empty()
                     
                     if result["success"]:
