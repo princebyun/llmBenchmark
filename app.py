@@ -7,7 +7,7 @@ from views import tab_benchmark, tab_leaderboard, tab_history
 st.set_page_config(
     page_title="로컬 LLM 하드웨어 벤치마크",
     page_icon="🚀",
-    layout="wide",
+    layout="centered",
     initial_sidebar_state="collapsed"
 )
 

@@ -10,7 +10,7 @@ def render():
     st.subheader("진단 환경 설정")
     
     if "target_ip" not in st.session_state:
-        st.session_state.target_ip = "localhost"
+        st.session_state.target_ip = ""
         
     col1, col2 = st.columns([4, 1])
     with col1:
@@ -45,13 +45,19 @@ def render():
         """)
     
     if "available_models" not in st.session_state:
-        with st.spinner("🤖 모델 목록을 스캔하고 있습니다... 잠시만 기다려주세요"):
-            st.session_state.available_models = get_all_models(target_ip)
+        if target_ip.strip() == "":
+            st.session_state.available_models = []
+        else:
+            with st.spinner("🤖 모델 목록을 스캔하고 있습니다... 잠시만 기다려주세요"):
+                st.session_state.available_models = get_all_models(target_ip)
             
     available_models = st.session_state.available_models
     
     if not available_models:
-        st.warning(f"'{target_ip}'에서 감지된 로컬 모델이 없습니다. 서버가 실행 중인지, 외부 접속이 허용되어 있는지 확인해 주세요.")
+        if target_ip.strip() == "":
+            st.info("🎯 벤치마크할 기기의 IP 주소를 입력하고 '적용 및 새로고침' 버튼을 눌러주세요. (현재 PC라면 localhost 입력)")
+        else:
+            st.warning(f"'{target_ip}'에서 감지된 로컬 모델이 없습니다. 서버가 실행 중인지, 외부 접속이 허용되어 있는지 확인해 주세요.")
     else:
         model_options = {}
         for m in available_models:
