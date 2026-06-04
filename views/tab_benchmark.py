@@ -148,7 +148,7 @@ def render():
         <script>
         const doc = window.parent.document;
         const observer = new MutationObserver(() => {
-            const listbox = doc.querySelector('div[role="listbox"]');
+            const listbox = doc.querySelector('ul[role="listbox"]') || doc.querySelector('div[role="listbox"]');
             if (listbox) {
                 const options = listbox.querySelectorAll('li[role="option"]');
                 options.forEach(option => {
@@ -156,8 +156,12 @@ def render():
                         option.dataset.listenerAttached = 'true';
                         option.addEventListener('click', () => {
                             setTimeout(() => {
-                                doc.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape', bubbles: true, composed: true }));
-                            }, 50);
+                                // 리액트가 바깥 클릭으로 인식하도록 mousedown과 click 이벤트 발생
+                                const target = doc.querySelector('.stApp') || doc.body;
+                                target.dispatchEvent(new MouseEvent('mousedown', { bubbles: true, cancelable: true, clientX: 0, clientY: 0 }));
+                                target.dispatchEvent(new MouseEvent('mouseup', { bubbles: true, cancelable: true, clientX: 0, clientY: 0 }));
+                                target.dispatchEvent(new MouseEvent('click', { bubbles: true, cancelable: true, clientX: 0, clientY: 0 }));
+                            }, 100);
                         });
                     }
                 });
