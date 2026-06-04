@@ -17,3 +17,16 @@ def render():
         st.success(f"**추천 최대 구동 가능 모델:** {', '.join(recommended)}")
     elif vram_val == 0:
         st.warning("GPU가 없어 CPU로 구동해야 합니다. 3B 이하 초소형 모델만 추천합니다.")
+        
+    with st.expander("💡 벤치마크 필수 설정 (브라우저 CORS 허용 방법)"):
+        st.markdown("""
+        본 벤치마크는 오라클 서버가 아닌 **사용자님의 웹 브라우저가 직접 로컬 PC와 통신**합니다.
+        따라서 방화벽 포트포워딩은 필요 없지만, 브라우저 보안 정책상 **CORS(교차 출처 리소스 공유)**를 허용해야 합니다.
+        
+        **1. Ollama의 경우:**
+        - **Windows:** 시스템 환경 변수 편집에서 `OLLAMA_ORIGINS` 변수를 만들고 값을 `*` 로 설정한 뒤 Ollama 재시작
+        - **Mac/Linux:** 터미널에서 `export OLLAMA_ORIGINS="*"` 입력 후 `ollama serve` 실행
+        
+        **2. LM Studio의 경우:**
+        - 개발자 옵션(Local Server 탭)에서 `Cross-Origin-Resource-Sharing (CORS)` 활성화
+        """)

@@ -19,15 +19,17 @@ def render():
 
     st.header("🔧 2. 측정 환경 및 통신 조건")
     st.markdown("""
-    벤치마크 테스트는 사용자 네트워크 내부(Localhost 또는 지정된 내부망 IP)에서 직접 HTTP REST API를 호출하는 방식으로 이루어집니다. 
-    웹 브라우저(클라이언트)가 직접 사용자의 백그라운드 LLM 서버에 스트리밍(Streaming) 방식으로 프롬프트를 요청하여 응답을 수신합니다.
+    벤치마크 테스트는 서버(Python)가 아닌 **사용자의 웹 브라우저(Client-Side Javascript)**에서 직접 수행됩니다.
+    웹 브라우저가 사용자 PC의 로컬 LLM 서버(`localhost`)로 직접 REST API를 호출하여 스트리밍(Streaming) 방식으로 프롬프트를 전송하고 응답을 수신합니다.
 
-    - **지원하는 백그라운드 서버 API:**
-      - **Ollama:** 포트 `11434`를 사용하는 기본 API `/api/chat` 엔드포인트를 통해 JSON 스트림 형태의 응답을 파싱합니다.
-      - **LM Studio / vLLM / oMLX:** 포트 `1234`, `8080` 등을 사용하는 OpenAI 호환(OpenAI-Compatible) API `/v1/chat/completions` 규격을 통해 SSE (Server-Sent Events) 프로토콜을 분석합니다.
+    - **지원하는 로컬 서버 API:**
+      - **Ollama:** `http://127.0.0.1:11434/api/chat` 엔드포인트를 통해 JSON 스트림 형태의 응답을 파싱합니다.
+      - **LM Studio / vLLM / oMLX:** `http://127.0.0.1:1234` 등 OpenAI 호환(OpenAI-Compatible) API 규격을 사용하여 SSE (Server-Sent Events) 프로토콜을 분석합니다.
+    - **보안 및 CORS 정책:**
+      - 브라우저는 기본적으로 다른 도메인으로의 요청을 차단하지만, `http://127.0.0.1` (localhost)는 안전한 루프백 주소로 예외 취급되어 HTTPS 환경에서도 Mixed Content 오류 없이 통신이 가능합니다. (단, Safari 등 일부 브라우저 설정에 따라 다를 수 있음)
+      - 로컬 서버(Ollama 등) 측에서 반드시 `OLLAMA_ORIGINS="*"`와 같은 CORS 허용 설정이 되어 있어야 브라우저가 응답을 읽을 수 있습니다.
     - **타임아웃(Timeout) 방어 로직:** 
-      - 모델이 VRAM으로 최초 적재(Loading)되는 데 걸리는 콜드 스타트(Cold Start) 지연을 감안하여 초기 응답 타임아웃은 **60초**로 넉넉하게 설정되어 있습니다.
-      - 테스트가 영원히 멈추는 것을 방지하기 위해 전체 측정 시간은 최대 **120초**, 또는 최대 토큰 처리 수는 **1000 Token**으로 강제 제한됩니다.
+      - 모델이 VRAM으로 최초 적재(Loading)되는 데 걸리는 콜드 스타트(Cold Start) 지연을 감안하여 초기 응답 대기 시간을 부여합니다.
     """)
 
     st.header("📐 3. 핵심 측정 지표 (Metrics) 상세 설명")

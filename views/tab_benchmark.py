@@ -1,220 +1,92 @@
 import streamlit as st
 import pandas as pd
-from config import PROMPT_TEMPLATES
-from services.models import get_all_models
-from services.benchmark import benchmark_model, get_baseline_tps
-from services.benchmark_advanced import benchmark_multiturn
+from config import PROMPT_TEMPLATES, MULTI_TURN_SCENARIO, OLLAMA_PORT, LMSTUDIO_PORT, VLLM_PORT
+from components.client_engine import benchmark_engine
+from services.scoring import get_baseline_tps
 from services.history import save_benchmark_history
-from services.security import validate_target_ip
 from components.charts import draw_gauge_chart, draw_radar_chart, draw_multiturn_line_chart
-from components.spinner import show_custom_spinner
 
 def render():
-    st.subheader("🚀 벤치마크 실행")
+    st.subheader("🚀 로컬 기기 벤치마크 (Client-Side)")
     
-    # 1. IP 입력 및 보안 검증
-    st.markdown("#### 1. 대상 기기 연결")
-    if "target_ip" not in st.session_state:
-        st.session_state.target_ip = ""
-        
-    col1, col2 = st.columns([5, 1])
-    with col1:
-        target_ip_input = st.text_input("🎯 벤치마크할 기기의 IP 주소", value=st.session_state.target_ip)
-        
-    if target_ip_input != st.session_state.target_ip:
-        if target_ip_input.strip() == "":
-            st.session_state.target_ip = ""
-            if "available_models" in st.session_state:
-                del st.session_state["available_models"]
-        else:
-            is_safe, msg = validate_target_ip(target_ip_input)
-            if not is_safe:
-                st.error(f"🚨 접근 차단: {msg}")
-            else:
-                st.session_state.target_ip = target_ip_input
-                if "available_models" in st.session_state:
-                    del st.session_state["available_models"]
-
-    with col2:
-        st.markdown("<div style='margin-top: 28px;'></div>", unsafe_allow_html=True)
-        if st.button("연결 적용", use_container_width=True):
-            if target_ip_input.strip() == "":
-                st.session_state.target_ip = ""
-                if "available_models" in st.session_state:
-                    del st.session_state["available_models"]
-            else:
-                is_safe, msg = validate_target_ip(target_ip_input)
-                if not is_safe:
-                    st.error(f"🚨 접근 차단: {msg}")
-                else:
-                    st.session_state.target_ip = target_ip_input
-                    if "available_models" in st.session_state:
-                        del st.session_state["available_models"]
-                
-    target_ip = st.session_state.target_ip
+    st.info("현재 접속 중인 브라우저가 실행되고 있는 **사용자님의 PC(localhost)**를 진단합니다.")
     
-    if target_ip.strip() != "":
-        is_safe, _ = validate_target_ip(target_ip)
-        if not is_safe:
+    # JS 엔진에 넘겨줄 설정
+    config = {
+        "ollama_port": OLLAMA_PORT,
+        "lmstudio_port": LMSTUDIO_PORT,
+        "vllm_port": VLLM_PORT,
+        "multiturn_scenario": MULTI_TURN_SCENARIO
+    }
+    
+    # 브라우저에서 실행될 JS 컴포넌트 호출
+    # 컴포넌트가 완료되면 결과를 JSON(dict)으로 반환합니다.
+    result_payload = benchmark_engine(
+        prompts=PROMPT_TEMPLATES,
+        config=config,
+        key="benchmark_main"
+    )
+    
+    # 결과 수신 후 시각화
+    if result_payload and "results" in result_payload:
+        results = result_payload["results"]
+        if not results:
             return
             
-    st.caption("외부 기기를 벤치마크하려면 해당 기기의 IP를 입력하세요. 서버 관리용 메타데이터 IP 등은 보안상 차단됩니다.")
-    
-    with st.expander("💡 외부 기기 방화벽 및 접속 허용 설정 방법 보기"):
-        st.markdown("""
-        **1. Ollama의 경우 (서버 PC에서 설정 후 재시작):**
-        - **Windows:** 명령 프롬프트에서 `set OLLAMA_HOST=0.0.0.0` 및 `set OLLAMA_ORIGINS="*"` 입력 후 `ollama serve` 실행
-        - **Mac/Linux:** 터미널에서 `export OLLAMA_HOST=0.0.0.0` 및 `export OLLAMA_ORIGINS="*"` 입력 후 `ollama serve` 실행
+        st.markdown("---")
+        st.subheader("📊 일괄 벤치마크 요약 결과")
         
-        **2. LM Studio의 경우:**
-        - 개발자 옵션(Local Server 탭)에서 `Cross-Origin-Resource-Sharing (CORS)` 활성화
-        - 외부 IP가 접근할 수 있도록 포트(1234) 방화벽 해제
+        results_summary = []
         
-        **3. vLLM의 경우:**
-        - 서버 실행 명령어에 `--host 0.0.0.0` 옵션을 추가하여 실행하세요. (예: `python -m vllm.entrypoints.openai.api_server --host 0.0.0.0 --model <모델명>`)
-        
-        **4. oMLX의 경우:**
-        - 서버 실행 명령어에 `--host 0.0.0.0` 옵션을 추가하여 실행하거나, 앱 내 네트워크 설정에서 외부 접속을 허용해 주세요.
-        """)
-        
-    st.markdown("---")
-    
-    # 2. 모델 스캔 및 큐 관리
-    st.markdown("#### 2. 진단할 모델 선택")
-    if "available_models" not in st.session_state:
-        if target_ip.strip() == "":
-            st.session_state.available_models = []
-        else:
-            popup = st.empty()
-            popup.markdown(show_custom_spinner("🤖 모델 목록을 스캔하고 있습니다... 잠시만 기다려주세요"), unsafe_allow_html=True)
-            st.session_state.available_models = get_all_models(target_ip)
-            popup.empty()
-            
-    available_models = st.session_state.available_models
-    
-    if not available_models:
-        if target_ip.strip() == "":
-            st.info("🎯 IP 주소를 입력하여 연결을 활성화해 주세요.")
-        else:
-            st.warning(f"'{target_ip}'에서 감지된 로컬 모델이 없습니다. 서버 실행 여부와 방화벽을 확인하세요.")
-    else:
-        model_options = {}
-        for m in available_models:
-            param_text = f"{m['params']}B" if m['params'] > 0 else "Unknown"
-            display_name = f"[{m['source']}] {m['name']} (Params: {param_text})"
-            model_options[display_name] = m
-            
-        if "selected_models_list" not in st.session_state:
-            st.session_state.selected_models_list = []
-            
-        def on_model_select():
-            selected = st.session_state.get("temp_model_selector")
-            if selected and selected != "선택하세요":
-                if selected not in st.session_state.selected_models_list:
-                    st.session_state.selected_models_list.append(selected)
-
-        options = ["선택하세요"] + list(model_options.keys())
-        st.selectbox(
-            "대기열에 추가할 모델:", 
-            options=options,
-            key="temp_model_selector",
-            on_change=on_model_select
-        )
-        
-        st.session_state.model_options = model_options
-        selected_options = st.session_state.selected_models_list
-        
-        if selected_options:
-            st.markdown("**✅ 벤치마크 진행 대기열:**")
-            for m in selected_options:
-                colA, colB = st.columns([10, 1])
-                with colA:
-                    st.info(m)
-                with colB:
-                    st.markdown("<div style='margin-top: 15px;'></div>", unsafe_allow_html=True)
-                    if st.button("❌", key=f"remove_{m}", help="이 모델을 대기열에서 제거합니다"):
-                        st.session_state.selected_models_list.remove(m)
-                        st.rerun()
-
-            st.markdown("---")
-            st.markdown("#### 3. 프롬프트 설정 및 실행")
-            prompt_category = st.selectbox("벤치마크 프롬프트 유형", list(PROMPT_TEMPLATES.keys()))
-            prompt_text = PROMPT_TEMPLATES[prompt_category]
+        for item in results:
+            model_info = item["modelInfo"]
+            prompt_category = item["promptCategory"]
+            res = item["result"]
             is_multiturn = "멀티턴" in prompt_category
             
-            if st.button("벤치마크 일괄 시작", type="primary", use_container_width=True):
-                progress_bar = st.progress(0)
-                status_text = st.empty()
-                results_summary = []
-                has_error = False
+            target_tps = get_baseline_tps(model_info)
+            save_benchmark_history(model_info, prompt_category, res, target_tps)
+            
+            summary_item = {
+                "모델명": model_info["name"],
+                "모델 로딩 (s)": round(res.get("load_time", 0) or 0, 2),
+                "프롬프트 TPS": round(res.get("prompt_tps", 0) or 0, 1),
+                "TTFT (s)": round(res.get("ttft", 0), 2),
+                "서버 자체 TPS": round(res.get("server_tps", res.get("tps", 0)) or 0, 1),
+                "클라이언트 TPS": round(res.get("tps", 0), 1),
+                "달성률 (%)": round((res.get("tps", 0) / target_tps * 100) if target_tps > 0 else 0, 1)
+            }
+            
+            if is_multiturn:
+                summary_item["턴별 결과"] = res["turns"]
                 
-                for i, option in enumerate(selected_options):
-                    selected_model_info = model_options[option]
-                    status_text.info(f"[{i+1}/{len(selected_options)}] **{selected_model_info['name']}** 벤치마크 진행 중...")
-                    
-                    progress_placeholder = st.empty()
-                    
-                    if is_multiturn:
-                        result = benchmark_multiturn(selected_model_info, target_ip, progress_placeholder)
-                    else:
-                        result = benchmark_model(selected_model_info, target_ip, prompt_text, progress_placeholder)
-                        
-                    progress_placeholder.empty()
-                    
-                    if result.get("success"):
-                        target_tps = get_baseline_tps(selected_model_info)
-                        save_benchmark_history(selected_model_info, prompt_category, result, target_tps)
-                        st.success(f"✅ {selected_model_info['name']} 완료! (평균 TPS: {result['tps']:.1f})")
-                        
-                        params = selected_model_info.get("params", 0)
-                        
-                        summary_item = {
-                            "모델명": selected_model_info["name"],
-                            "모델 로딩 (s)": round(result.get("load_time", 0) or 0, 2),
-                            "프롬프트 TPS": round(result.get("prompt_tps", 0) or 0, 1),
-                            "TTFT (s)": round(result.get("ttft", 0), 2),
-                            "서버 자체 TPS": round(result.get("server_tps", result.get("tps", 0)) or 0, 1),
-                            "클라이언트 TPS": round(result.get("tps", 0), 1),
-                            "달성률 (%)": round((result.get("tps", 0) / target_tps * 100) if target_tps > 0 else 0, 1)
-                        }
-                        
-                        if is_multiturn:
-                            summary_item["턴별 결과"] = result["turns"]
-                            
-                        results_summary.append(summary_item)
-                    else:
-                        st.error(f"🚨 **{selected_model_info['name']} 실패!** 오류: `{result.get('error')}`")
-                        has_error = True
-                        
-                    progress_bar.progress((i + 1) / len(selected_options))
+            results_summary.append(summary_item)
+            
+        # 테이블 표시 (턴별 결과 제외)
+        display_df = pd.DataFrame([{k: v for k, v in r.items() if k != "턴별 결과"} for r in results_summary])
+        st.dataframe(display_df, use_container_width=True, hide_index=True)
+        
+        # 상세 차트
+        for r in results_summary:
+            if "턴별 결과" in r:
+                st.markdown(f"#### 🔄 {r['모델명']} 멀티턴 상세 분석")
+                colA, colB = st.columns([1, 1])
+                with colA:
+                    st.dataframe(pd.DataFrame(r["턴별 결과"])[["턴", "TTFT", "클라이언트 TPS", "토큰 수"]], use_container_width=True, hide_index=True)
+                with colB:
+                    fig = draw_multiturn_line_chart(r["턴별 결과"])
+                    st.plotly_chart(fig, use_container_width=True)
+            else:
+                st.markdown(f"#### 🎯 {r['모델명']} 종합 성능 분석")
+                colA, colB = st.columns([1, 1])
                 
-                if has_error:
-                    status_text.warning("⚠️ 일부 벤치마크 과정에서 오류가 발생했습니다.")
-                else:
-                    status_text.success("🎉 모든 벤치마크가 성공적으로 완료되었습니다!")
+                # 모델 정보를 찾기 (get_baseline_tps에 전달하기 위해)
+                matching_model_info = next(item["modelInfo"] for item in results if item["modelInfo"]["name"] == r["모델명"])
+                baseline = get_baseline_tps(matching_model_info)
                 
-                if results_summary:
-                    st.markdown("---")
-                    st.subheader("📊 일괄 벤치마크 요약 결과")
-                    
-                    display_df = pd.DataFrame([{k: v for k, v in r.items() if k != "턴별 결과"} for r in results_summary])
-                    st.dataframe(display_df, use_container_width=True, hide_index=True)
-                    
-                    for r in results_summary:
-                        if is_multiturn and "턴별 결과" in r:
-                            st.markdown(f"#### 🔄 {r['모델명']} 멀티턴 상세 분석")
-                            colA, colB = st.columns([1, 1])
-                            with colA:
-                                st.dataframe(pd.DataFrame(r["턴별 결과"])[["턴", "TTFT", "클라이언트 TPS", "토큰 수"]], use_container_width=True, hide_index=True)
-                            with colB:
-                                fig = draw_multiturn_line_chart(r["턴별 결과"])
-                                st.plotly_chart(fig, use_container_width=True)
-                        else:
-                            st.markdown(f"#### 🎯 {r['모델명']} 종합 성능 분석")
-                            colA, colB = st.columns([1, 1])
-                            with colA:
-                                fig_gauge = draw_gauge_chart(r["클라이언트 TPS"], get_baseline_tps(model_options[[opt for opt in selected_options if model_options[opt]['name'] == r['모델명']][0]]))
-                                st.plotly_chart(fig_gauge, use_container_width=True)
-                            with colB:
-                                fig_radar = draw_radar_chart(r)
-                                st.plotly_chart(fig_radar, use_container_width=True)
+                with colA:
+                    fig_gauge = draw_gauge_chart(r["클라이언트 TPS"], baseline)
+                    st.plotly_chart(fig_gauge, use_container_width=True)
+                with colB:
+                    fig_radar = draw_radar_chart(r)
+                    st.plotly_chart(fig_radar, use_container_width=True)

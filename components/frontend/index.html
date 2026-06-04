@@ -1,0 +1,563 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <title>LLM Benchmark Engine</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            margin: 0;
+            padding: 10px;
+            color: #31333F;
+            background-color: transparent;
+        }
+        .card {
+            background-color: #F8F9FA;
+            border: 1px solid #E5E7EB;
+            border-radius: 8px;
+            padding: 15px;
+            margin-bottom: 15px;
+        }
+        h4 { margin-top: 0; margin-bottom: 10px; color: #111827; }
+        .btn {
+            background-color: #4F46E5;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            padding: 8px 16px;
+            font-weight: 600;
+            cursor: pointer;
+            width: 100%;
+            margin-top: 10px;
+        }
+        .btn:disabled { background-color: #9CA3AF; cursor: not-allowed; }
+        select {
+            width: 100%;
+            padding: 8px;
+            border: 1px solid #D1D5DB;
+            border-radius: 4px;
+            margin-bottom: 10px;
+        }
+        .log-box {
+            background-color: #1F2937;
+            color: #10B981;
+            padding: 10px;
+            border-radius: 6px;
+            font-family: monospace;
+            font-size: 13px;
+            min-height: 50px;
+            max-height: 200px;
+            overflow-y: auto;
+            margin-top: 10px;
+            white-space: pre-wrap;
+            word-wrap: break-word;
+        }
+        .progress-container {
+            width: 100%;
+            background-color: #E5E7EB;
+            border-radius: 4px;
+            margin-top: 10px;
+            height: 8px;
+            overflow: hidden;
+        }
+        .progress-bar {
+            height: 100%;
+            background-color: #4F46E5;
+            width: 0%;
+            transition: width 0.3s;
+        }
+        .status-text { font-size: 14px; font-weight: bold; margin-top: 10px; color: #4F46E5; }
+        .queue-item {
+            display: flex;
+            justify-content: space-between;
+            background: white;
+            padding: 8px;
+            border: 1px solid #E5E7EB;
+            border-radius: 4px;
+            margin-bottom: 5px;
+            font-size: 14px;
+        }
+        .remove-btn { color: #EF4444; cursor: pointer; font-weight: bold; }
+    </style>
+</head>
+<body>
+
+    <div id="scan-section" class="card">
+        <h4>🤖 1. 로컬 모델 스캔 및 대기열 추가</h4>
+        <p style="font-size:14px; color:#6B7280; margin-bottom:10px;">내 PC(localhost)에서 구동 중인 모델을 스캔합니다.</p>
+        <button id="scan-btn" class="btn" style="background-color: #10B981;">내 PC 스캔하기</button>
+        
+        <div id="model-select-area" style="display:none; margin-top:15px;">
+            <select id="model-select"></select>
+            <button id="add-queue-btn" class="btn" style="background-color: #6366F1;">대기열에 추가</button>
+        </div>
+    </div>
+
+    <div id="queue-section" class="card" style="display:none;">
+        <h4>✅ 2. 벤치마크 진행 대기열</h4>
+        <div id="queue-list"></div>
+        
+        <h4 style="margin-top: 20px;">프롬프트 설정</h4>
+        <select id="prompt-select"></select>
+        
+        <button id="start-btn" class="btn">🚀 벤치마크 일괄 시작</button>
+    </div>
+
+    <div id="progress-section" class="card" style="display:none;">
+        <h4>⏳ 3. 벤치마크 진행 상황</h4>
+        <div class="progress-container"><div id="progress-bar" class="progress-bar"></div></div>
+        <div id="status-text" class="status-text">준비 중...</div>
+        <div id="log-box" class="log-box"></div>
+    </div>
+
+    <script>
+        // ==========================================
+        // Streamlit Component Boilerplate
+        // ==========================================
+        function sendMessageToStreamlitClient(type, data) {
+            const outData = Object.assign({
+                isStreamlitMessage: true,
+                type: type,
+            }, data);
+            window.parent.postMessage(outData, "*");
+        }
+
+        function setFrameHeight() {
+            sendMessageToStreamlitClient("streamlit:setFrameHeight", {height: document.body.scrollHeight});
+        }
+
+        function sendDataToPython(data) {
+            sendMessageToStreamlitClient("streamlit:setComponentValue", {value: data});
+        }
+
+        // ==========================================
+        // App Logic
+        // ==========================================
+        let isInitialized = false;
+        let props = {};
+        
+        let availableModels = [];
+        let modelOptionsMap = {};
+        let queue = [];
+        
+        // UI Elements
+        const scanBtn = document.getElementById('scan-btn');
+        const modelSelectArea = document.getElementById('model-select-area');
+        const modelSelect = document.getElementById('model-select');
+        const addQueueBtn = document.getElementById('add-queue-btn');
+        const queueSection = document.getElementById('queue-section');
+        const queueList = document.getElementById('queue-list');
+        const promptSelect = document.getElementById('prompt-select');
+        const startBtn = document.getElementById('start-btn');
+        const progressSection = document.getElementById('progress-section');
+        const progressBar = document.getElementById('progress-bar');
+        const statusText = document.getElementById('status-text');
+        const logBox = document.getElementById('log-box');
+
+        // Parse param from name
+        function extractParams(name) {
+            const match = name.match(/(\d+(?:\.\d+)?)[bB]/);
+            if (match) return parseFloat(match[1]);
+            return 0.0;
+        }
+
+        async function scanModels() {
+            scanBtn.disabled = true;
+            scanBtn.innerText = "스캔 중...";
+            availableModels = [];
+            modelOptionsMap = {};
+            
+            // 1. Ollama
+            try {
+                const res = await fetch(`http://127.0.0.1:${props.config.ollama_port}/api/tags`);
+                if (res.ok) {
+                    const data = await res.json();
+                    data.models?.forEach(m => {
+                        let params = 0.0;
+                        const sizeStr = m.details?.parameter_size || "";
+                        if (sizeStr.toUpperCase().includes("B")) {
+                            params = parseFloat(sizeStr.toUpperCase().replace("B", "")) || 0;
+                        }
+                        if (params === 0) params = extractParams(m.name);
+                        
+                        availableModels.push({
+                            name: m.name,
+                            source: "Ollama",
+                            params: params,
+                            port: props.config.ollama_port
+                        });
+                    });
+                }
+            } catch (e) { console.log("Ollama scan failed", e); }
+
+            // 2. LM Studio
+            try {
+                const res = await fetch(`http://127.0.0.1:${props.config.lmstudio_port}/v1/models`);
+                if (res.ok) {
+                    const data = await res.json();
+                    data.data?.forEach(m => {
+                        availableModels.push({
+                            name: m.id,
+                            source: "LM Studio",
+                            params: extractParams(m.id),
+                            port: props.config.lmstudio_port
+                        });
+                    });
+                }
+            } catch (e) { console.log("LM Studio scan failed", e); }
+
+            // 3. vLLM
+            try {
+                const res = await fetch(`http://127.0.0.1:${props.config.vllm_port}/v1/models`);
+                if (res.ok) {
+                    const data = await res.json();
+                    data.data?.forEach(m => {
+                        availableModels.push({
+                            name: m.id,
+                            source: "vLLM / oMLX",
+                            params: extractParams(m.id),
+                            port: props.config.vllm_port
+                        });
+                    });
+                }
+            } catch (e) { console.log("vLLM scan failed", e); }
+
+            scanBtn.disabled = false;
+            scanBtn.innerText = "내 PC 스캔 완료 (다시 스캔)";
+
+            if (availableModels.length > 0) {
+                modelSelectArea.style.display = "block";
+                modelSelect.innerHTML = "";
+                
+                availableModels.forEach(m => {
+                    const pText = m.params > 0 ? `${m.params}B` : "Unknown";
+                    const displayName = `[${m.source}] ${m.name} (Params: ${pText})`;
+                    modelOptionsMap[displayName] = m;
+                    const opt = document.createElement('option');
+                    opt.value = displayName;
+                    opt.innerText = displayName;
+                    modelSelect.appendChild(opt);
+                });
+            } else {
+                modelSelectArea.style.display = "none";
+                alert("감지된 로컬 모델이 없습니다. Ollama, LM Studio 등이 실행 중인지 확인하세요. (CORS 권한 필요)");
+            }
+            setFrameHeight();
+        }
+
+        scanBtn.onclick = scanModels;
+
+        function updateQueueUI() {
+            if (queue.length > 0) {
+                queueSection.style.display = "block";
+                queueList.innerHTML = "";
+                queue.forEach((displayName, idx) => {
+                    const div = document.createElement('div');
+                    div.className = "queue-item";
+                    div.innerHTML = `<span>${displayName}</span> <span class="remove-btn" onclick="removeFromQueue(${idx})">❌</span>`;
+                    queueList.appendChild(div);
+                });
+            } else {
+                queueSection.style.display = "none";
+            }
+            setFrameHeight();
+        }
+
+        window.removeFromQueue = function(idx) {
+            queue.splice(idx, 1);
+            updateQueueUI();
+        }
+
+        addQueueBtn.onclick = () => {
+            const val = modelSelect.value;
+            if (val && !queue.includes(val)) {
+                queue.push(val);
+                updateQueueUI();
+            }
+        };
+
+        async function streamOllama(modelInfo, promptText) {
+            const url = `http://127.0.0.1:${modelInfo.port}/api/chat`;
+            const payload = {
+                model: modelInfo.name,
+                messages: [{ role: "user", content: promptText }],
+                stream: true
+            };
+            
+            const startTime = performance.now();
+            let firstTokenTime = null;
+            let tokenCount = 0;
+            let fullResponse = "";
+            let result = { success: false };
+
+            logBox.innerText = `[${modelInfo.name}] 연결 중...\n`;
+
+            try {
+                const response = await fetch(url, {
+                    method: 'POST',
+                    body: JSON.stringify(payload),
+                    headers: { 'Content-Type': 'application/json' }
+                });
+
+                if (!response.ok) throw new Error("Network response was not ok");
+
+                const reader = response.body.getReader();
+                const decoder = new TextDecoder();
+
+                while (true) {
+                    const { done, value } = await reader.read();
+                    if (done) break;
+                    
+                    const chunkStr = decoder.decode(value, { stream: true });
+                    const lines = chunkStr.split('\n');
+                    
+                    for (const line of lines) {
+                        if (!line.trim()) continue;
+                        
+                        if (firstTokenTime === null) firstTokenTime = performance.now();
+                        
+                        const data = JSON.parse(line);
+                        if (data.message && data.message.content) {
+                            fullResponse += data.message.content;
+                            tokenCount++;
+                            logBox.innerText = fullResponse;
+                            logBox.scrollTop = logBox.scrollHeight;
+                        }
+                        
+                        if (data.done) {
+                            const evalCount = data.eval_count || 0;
+                            const evalDur = (data.eval_duration || 0) / 1e9;
+                            const promptEvalDur = (data.prompt_eval_duration || 0) / 1e9;
+                            
+                            const endTime = performance.now();
+                            const totalTimeSec = (endTime - firstTokenTime) / 1000;
+                            
+                            result = {
+                                success: true,
+                                response: fullResponse,
+                                ttft: (firstTokenTime - startTime) / 1000,
+                                tps: totalTimeSec > 0 ? (tokenCount / totalTimeSec) : 0,
+                                server_tps: evalDur > 0 ? (evalCount / evalDur) : 0,
+                                prompt_tps: promptEvalDur > 0 ? (data.prompt_eval_count / promptEvalDur) : 0,
+                                load_time: (data.load_duration || 0) / 1e9,
+                                server_token_count: evalCount
+                            };
+                            break;
+                        }
+                    }
+                }
+            } catch (e) {
+                result.error = e.toString();
+            }
+            return result;
+        }
+
+        async function streamOpenAICompatible(modelInfo, promptText) {
+            const url = `http://127.0.0.1:${modelInfo.port}/v1/chat/completions`;
+            const payload = {
+                model: modelInfo.name,
+                messages: [{ role: "user", content: promptText }],
+                stream: true,
+                stream_options: { include_usage: true }
+            };
+            
+            const startTime = performance.now();
+            let firstTokenTime = null;
+            let tokenCount = 0;
+            let fullResponse = "";
+            let serverTokenCount = 0;
+            let result = { success: false };
+
+            logBox.innerText = `[${modelInfo.name}] 연결 중...\n`;
+
+            try {
+                const response = await fetch(url, {
+                    method: 'POST',
+                    body: JSON.stringify(payload),
+                    headers: { 'Content-Type': 'application/json' }
+                });
+
+                if (!response.ok) throw new Error("Network response was not ok");
+
+                const reader = response.body.getReader();
+                const decoder = new TextDecoder();
+
+                while (true) {
+                    const { done, value } = await reader.read();
+                    if (done) break;
+                    
+                    const chunkStr = decoder.decode(value, { stream: true });
+                    const lines = chunkStr.split('\n');
+                    
+                    for (const line of lines) {
+                        const trimmed = line.trim();
+                        if (!trimmed || !trimmed.startsWith("data: ")) continue;
+                        
+                        const dataStr = trimmed.substring(6);
+                        if (dataStr === "[DONE]") break;
+                        
+                        if (firstTokenTime === null) firstTokenTime = performance.now();
+                        
+                        try {
+                            const data = JSON.parse(dataStr);
+                            if (data.choices && data.choices.length > 0) {
+                                const content = data.choices[0].delta?.content;
+                                if (content) {
+                                    fullResponse += content;
+                                    tokenCount++;
+                                    logBox.innerText = fullResponse;
+                                    logBox.scrollTop = logBox.scrollHeight;
+                                }
+                            }
+                            if (data.usage && data.usage.completion_tokens) {
+                                serverTokenCount = data.usage.completion_tokens;
+                            }
+                        } catch(e) {}
+                    }
+                }
+                
+                const endTime = performance.now();
+                const totalTimeSec = (endTime - firstTokenTime) / 1000;
+                const clientTps = totalTimeSec > 0 ? (tokenCount / totalTimeSec) : 0;
+                
+                result = {
+                    success: true,
+                    response: fullResponse,
+                    ttft: (firstTokenTime - startTime) / 1000,
+                    tps: clientTps,
+                    server_tps: totalTimeSec > 0 && serverTokenCount > 0 ? (serverTokenCount / totalTimeSec) : clientTps,
+                    prompt_tps: 0,
+                    load_time: 0,
+                    server_token_count: serverTokenCount || tokenCount
+                };
+                
+            } catch (e) {
+                result.error = e.toString();
+            }
+            return result;
+        }
+
+        async function runSingleBenchmark(modelInfo, promptCategory, promptText) {
+            const isMultiturn = promptCategory.includes("멀티턴");
+            if (!isMultiturn) {
+                if (modelInfo.source === "Ollama") return await streamOllama(modelInfo, promptText);
+                else return await streamOpenAICompatible(modelInfo, promptText);
+            } else {
+                // Multiturn Logic
+                const turnPrompts = props.config.multiturn_scenario;
+                let accumulatedPrompt = "";
+                let turnResults = [];
+                let firstLoadTime = 0;
+                let firstTtft = 0;
+                
+                for (let i = 0; i < turnPrompts.length; i++) {
+                    statusText.innerText = `[${modelInfo.name}] 멀티턴 ${i+1}/3 턴 생성 중...`;
+                    accumulatedPrompt += `User: ${turnPrompts[i]}\nAssistant:`;
+                    
+                    let res;
+                    if (modelInfo.source === "Ollama") res = await streamOllama(modelInfo, accumulatedPrompt);
+                    else res = await streamOpenAICompatible(modelInfo, accumulatedPrompt);
+                    
+                    if (!res.success) return { success: false, error: res.error };
+                    
+                    accumulatedPrompt += ` ${res.response}\n\n`;
+                    if (i === 0) {
+                        firstLoadTime = res.load_time;
+                        firstTtft = res.ttft;
+                    }
+                    
+                    turnResults.push({
+                        "턴": i + 1,
+                        "TTFT": res.ttft,
+                        "클라이언트 TPS": res.tps,
+                        "서버 TPS": res.server_tps,
+                        "토큰 수": res.server_token_count,
+                        "응답 내용": res.response
+                    });
+                    
+                    await new Promise(r => setTimeout(r, 1000));
+                }
+                
+                let avgTps = turnResults.reduce((sum, t) => sum + t["클라이언트 TPS"], 0) / 3;
+                let avgServerTps = turnResults.reduce((sum, t) => sum + t["서버 TPS"], 0) / 3;
+                
+                return {
+                    success: true,
+                    turns: turnResults,
+                    tps: avgTps,
+                    server_tps: avgServerTps,
+                    ttft: firstTtft,
+                    load_time: firstLoadTime
+                };
+            }
+        }
+
+        startBtn.onclick = async () => {
+            if (queue.length === 0) return;
+            
+            scanBtn.disabled = true;
+            addQueueBtn.disabled = true;
+            startBtn.disabled = true;
+            
+            progressSection.style.display = "block";
+            setFrameHeight();
+            
+            const promptCategory = promptSelect.value;
+            const promptText = props.prompts[promptCategory];
+            
+            let finalResults = [];
+            
+            for (let i = 0; i < queue.length; i++) {
+                const qName = queue[i];
+                const mInfo = modelOptionsMap[qName];
+                
+                statusText.innerText = `[${i+1}/${queue.length}] ${mInfo.name} 벤치마크 진행 중...`;
+                progressBar.style.width = `${((i) / queue.length) * 100}%`;
+                
+                const res = await runSingleBenchmark(mInfo, promptCategory, promptText);
+                
+                if (res.success) {
+                    finalResults.push({
+                        modelInfo: mInfo,
+                        promptCategory: promptCategory,
+                        result: res
+                    });
+                } else {
+                    logBox.innerText = `\n[실패] ${mInfo.name}: ${res.error}\n`;
+                }
+                progressBar.style.width = `${((i+1) / queue.length) * 100}%`;
+            }
+            
+            statusText.innerText = `✅ 모든 벤치마크 완료! 결과를 전송합니다...`;
+            logBox.innerText = "Python으로 결과를 보내고 있습니다.";
+            
+            // Send final payload to Python
+            sendDataToPython({ results: finalResults });
+        };
+
+        // Render hook
+        window.addEventListener("message", function(event) {
+            if (event.data.type === "streamlit:render") {
+                if (!isInitialized) {
+                    isInitialized = true;
+                    props = event.data.args;
+                    
+                    // Populate Prompts
+                    for (const [key, val] of Object.entries(props.prompts)) {
+                        const opt = document.createElement("option");
+                        opt.value = key;
+                        opt.innerText = key;
+                        promptSelect.appendChild(opt);
+                    }
+                    
+                    sendMessageToStreamlitClient("streamlit:componentReady", {apiVersion: 1});
+                    setFrameHeight();
+                }
+            }
+        });
+        
+        // Signal ready
+        sendMessageToStreamlitClient("streamlit:componentReady", {apiVersion: 1});
+    </script>
+</body>
+</html>
