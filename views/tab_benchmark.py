@@ -147,27 +147,46 @@ def render():
         components.html("""
         <script>
         const doc = window.parent.document;
-        const observer = new MutationObserver(() => {
-            const listbox = doc.querySelector('[role="listbox"]');
-            if (listbox) {
+        // 기존 observer가 있다면 정리 (중복 방지)
+        if (window.parent.myDropdownObserver) {
+            window.parent.myDropdownObserver.disconnect();
+        }
+        window.parent.myDropdownObserver = new MutationObserver(() => {
+            const listboxes = doc.querySelectorAll('[role="listbox"]');
+            listboxes.forEach(listbox => {
                 const options = listbox.querySelectorAll('[role="option"]');
                 options.forEach(option => {
-                    if (!option.dataset.listenerAttached) {
-                        option.dataset.listenerAttached = 'true';
+                    if (!option.dataset.autoCloseAttached) {
+                        option.dataset.autoCloseAttached = 'true';
                         option.addEventListener('click', () => {
+                            // 사용자의 클릭 처리가 완료될 때까지 충분히 대기 (150ms)
                             setTimeout(() => {
-                                // 옵션을 클릭하면 즉시 모든 select input의 포커스를 해제(blur)하여 목록을 강제로 닫음
-                                const inputs = doc.querySelectorAll('div[data-baseweb="select"] input');
-                                inputs.forEach(input => {
-                                    input.blur();
+                                // 화면 최상단 빈 공간에 마우스 클릭 이벤트를 발생시켜 강제로 창을 닫음
+                                const appElement = doc.querySelector('.stApp') || doc.body;
+                                const mousedownEvent = new MouseEvent('mousedown', {
+                                    bubbles: true, cancelable: true, view: window.parent, clientX: 1, clientY: 1
                                 });
-                            }, 10);
+                                const mouseupEvent = new MouseEvent('mouseup', {
+                                    bubbles: true, cancelable: true, view: window.parent, clientX: 1, clientY: 1
+                                });
+                                const clickEvent = new MouseEvent('click', {
+                                    bubbles: true, cancelable: true, view: window.parent, clientX: 1, clientY: 1
+                                });
+                                appElement.dispatchEvent(mousedownEvent);
+                                appElement.dispatchEvent(mouseupEvent);
+                                appElement.dispatchEvent(clickEvent);
+                                
+                                // 추가적으로 포커스 해제도 시도
+                                if (doc.activeElement) {
+                                    doc.activeElement.blur();
+                                }
+                            }, 150);
                         });
                     }
                 });
-            }
+            });
         });
-        observer.observe(doc.body, { childList: true, subtree: true });
+        window.parent.myDropdownObserver.observe(doc.body, { childList: true, subtree: true });
         </script>
         """, height=0)
         
