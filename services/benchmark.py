@@ -36,8 +36,8 @@ def benchmark_model(model_info, target_ip="localhost", prompt_text="", progress_
                 "messages": [{"role": "user", "content": prompt_text}],
                 "stream": True
             }
-            # 초기 로딩(콜드스타트)이 오래 걸리는 모델을 위해 timeout을 120초로 넉넉히 부여
-            response = requests.post(url, json=payload, stream=True, timeout=120)
+            # 초기 로딩(콜드스타트) 대기를 위해 60초 타임아웃 부여
+            response = requests.post(url, json=payload, stream=True, timeout=60)
             response.raise_for_status()
             
             for line in response.iter_lines():
@@ -85,8 +85,8 @@ def benchmark_model(model_info, target_ip="localhost", prompt_text="", progress_
                 "stream": True,
                 "stream_options": {"include_usage": True}
             }
-            # 초기 로딩(콜드스타트)이 오래 걸리는 모델을 위해 timeout을 120초로 넉넉히 부여
-            response = requests.post(url, json=payload, stream=True, timeout=120)
+            # 초기 로딩(콜드스타트) 대기를 위해 60초 타임아웃 부여
+            response = requests.post(url, json=payload, stream=True, timeout=60)
             response.raise_for_status()
             
             for line in response.iter_lines():
