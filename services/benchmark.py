@@ -1,7 +1,7 @@
 import time
 import json
 import requests
-from config import MAX_TOKENS, MAX_TIME_SECONDS, REQUEST_TIMEOUT
+from config import MAX_TIME_SECONDS, REQUEST_TIMEOUT
 def get_baseline_tps(model_info):
     """모델의 실제 파라미터 수를 기반으로 동적 기준 TPS를 계산합니다."""
     params = model_info.get("params", 0)
@@ -68,10 +68,7 @@ def benchmark_model(model_info, target_ip="localhost", prompt_text="", progress_
                         server_token_count = eval_count
                         break
                         
-                    if token_count >= MAX_TOKENS:
-                        if progress_placeholder:
-                            progress_placeholder.warning("⚠️ 최대 토큰 수 초과로 측정을 강제 종료했습니다.")
-                        break
+
                         
         elif source in ["LM Studio", "vLLM / oMLX"]:
             port = model_info.get("port", 1234)
@@ -115,10 +112,7 @@ def benchmark_model(model_info, target_ip="localhost", prompt_text="", progress_
                         if server_token_count and first_token_time:
                             server_tps = server_token_count / (time.perf_counter() - first_token_time)
                                 
-                    if token_count >= MAX_TOKENS:
-                        if progress_placeholder:
-                            progress_placeholder.warning("⚠️ 최대 토큰 수 초과로 측정을 강제 종료했습니다.")
-                        break
+
 
         end_time = time.perf_counter()
         

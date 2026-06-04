@@ -4,7 +4,6 @@ LMSTUDIO_PORT = 1234
 VLLM_PORT = 8000
 
 # 벤치마크 안전장치 설정
-MAX_TOKENS = 1000  # 비정상적으로 긴 출력을 방지하기 위한 최대 토큰 수 제한
 MAX_TIME_SECONDS = 120  # 최대 테스트 시간 (초) - 무한 대기 방지
 REQUEST_TIMEOUT = 60 # 서버 초기 로딩 대기 시간
 
