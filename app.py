@@ -8,7 +8,7 @@ st.set_page_config(
     page_title="로컬 LLM 하드웨어 벤치마크",
     page_icon="🚀",
     layout="centered",
-    initial_sidebar_state="collapsed"
+    initial_sidebar_state="expanded"
 )
 
 # 불필요한 기본 UI 요소 숨기기 및 반응형 최대 너비(900px) 설정
@@ -28,32 +28,32 @@ st.markdown("""
 st.title("🚀 로컬 LLM 하드웨어 벤치마크 및 진단")
 st.markdown("Ollama, LM Studio, vLLM, oMLX 등에 설치된 모델을 감지하고 내 PC의 성능(TPS)을 글로벌 기준과 비교합니다.")
 
-tab1, tab2, tab3, tab4, tab5, tab6 = st.tabs([
-    "🚀 내 하드웨어 진단", 
-    "📊 벤치마크 이력",
-    "🏆 글로벌 리더보드", 
-    "📖 모델 사전",
-    "📚 측정 방법론",
-    "📝 가이드 & 블로그"
-])
+with st.sidebar:
+    st.markdown("### Menu")
+    menu_choice = st.radio(
+        "Navigation",
+        [
+            "🚀 내 하드웨어 진단", 
+            "📊 벤치마크 이력",
+            "🏆 글로벌 리더보드", 
+            "📖 모델 사전",
+            "📚 측정 방법론",
+            "📝 가이드 & 블로그"
+        ],
+        label_visibility="collapsed"
+    )
 
-with tab1:
+if menu_choice == "🚀 내 하드웨어 진단":
     tab_benchmark.render()
-    
-with tab2:
+elif menu_choice == "📊 벤치마크 이력":
     tab_history.render()
-    
-with tab3:
+elif menu_choice == "🏆 글로벌 리더보드":
     tab_leaderboard.render()
-
-    
-with tab4:
+elif menu_choice == "📖 모델 사전":
     tab_model_wiki.render()
-    
-with tab5:
+elif menu_choice == "📚 측정 방법론":
     tab_methodology.render()
-    
-with tab6:
+elif menu_choice == "📝 가이드 & 블로그":
     tab_blog.render()
 
 # ==========================================
