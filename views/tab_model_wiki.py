@@ -3,72 +3,72 @@
 import streamlit as st
 
 MODEL_WIKI_DATA = {
+    "Meta Llama 4 시리즈 (Scout, Maverick 등)": {
+        "title": "Meta Llama 4 시리즈 (Scout, Maverick 등)",
+        "description": "2025~2026년 기준 오픈소스 최고봉. 네이티브 멀티모달 능력과 MoE(전문가 혼합)를 도입한 완벽한 4세대 라인업입니다.",
+        "developer": "Meta AI",
+        "architecture": "Llama 4 Scout(109B, 활성 17B), Maverick(400B). 최대 10M(천만) 토큰 컨텍스트 지원.",
+        "pros_cons": """**장점 (Pros):**\n- 압도적 추론, 이미지/비디오 네이티브 이해, 천만 토큰의 광활한 기억력\n\n**단점 (Cons):**\n- MoE 구조라 전체 VRAM 요구량이 매우 높음""",
+        "use_cases": "- 기업용 대규모 AI 비서, 영상 분석 자동화",
+        "benchmark": "Scout 109B: 60GB VRAM / Maverick: 200GB 이상"
+    },
     "Meta Llama 3 시리즈 (8B, 70B)": {
         "title": "Meta Llama 3 시리즈 (8B, 70B)",
-        "description": "로컬 LLM의 절대적인 기준점. 8B와 70B 두 가지 체급으로 제공되는 최고 성능의 모델입니다.",
+        "description": "로컬 LLM의 대중화를 이끈 전설적인 3세대 모델. 여전히 가성비로 널리 쓰입니다.",
         "developer": "Meta AI",
-        "architecture": "트랜스포머 디코더, 8K 컨텍스트, Grouped Query Attention(GQA). 15조 토큰 학습.",
-        "pros_cons": """**장점 (Pros):**\n- 체급 대비 압도적 지능, 훌륭한 한국어 지원, 거대한 생태계\n\n**단점 (Cons):**\n- 기본 컨텍스트 길이가 8K로 긴 문서 처리에 불리함""",
+        "architecture": "트랜스포머 디코더, 8K 컨텍스트, Grouped Query Attention(GQA).",
+        "pros_cons": """**장점 (Pros):**\n- 체급 대비 압도적 지능, 거대한 생태계 및 최적화 자료\n\n**단점 (Cons):**\n- Llama 4 대비 부족한 컨텍스트(8K)와 멀티모달 부재""",
         "use_cases": "- 일상적인 챗봇, 코드 생성, 텍스트 요약",
         "benchmark": "8B: 6GB VRAM / 70B: 40GB VRAM"
     },
-    "Meta Llama 2 시리즈 (7B, 13B, 70B)": {
-        "title": "Meta Llama 2 시리즈 (7B, 13B, 70B)",
-        "description": "오픈소스 LLM 생태계를 폭발적으로 성장시킨 전설적인 이전 세대 모델입니다.",
-        "developer": "Meta AI",
-        "architecture": "트랜스포머 기반, 4K 컨텍스트.",
-        "pros_cons": """**장점 (Pros):**\n- 안정적이고 가장 많은 파인튜닝 레퍼런스 보유\n\n**단점 (Cons):**\n- 최신 모델 대비 떨어지는 지능 및 한국어 능력""",
-        "use_cases": "- 레거시 시스템 유지보수, 파인튜닝 교육용",
-        "benchmark": "7B: 5.5GB / 13B: 8.5GB / 70B: 40GB VRAM"
-    },
     "CodeLlama 시리즈 (7B~70B)": {
         "title": "CodeLlama 시리즈 (7B~70B)",
-        "description": "Llama 2를 기반으로 코딩 능력을 극대화한 개발자용 모델입니다.",
+        "description": "Llama 2를 기반으로 코딩 능력을 극대화한 레거시 개발자용 모델입니다.",
         "developer": "Meta AI",
         "architecture": "최대 100K 토큰 지원, 파이썬/C++ 등 특화 학습.",
         "pros_cons": """**장점 (Pros):**\n- 광범위한 언어 지원, 매우 긴 코드 컨텍스트 이해\n\n**단점 (Cons):**\n- 일반적인 대화나 한국어 질문에는 취약함""",
         "use_cases": "- 로컬 Copilot 연동, 코드 자동 완성",
         "benchmark": "체급에 따라 5.5GB ~ 40GB VRAM"
     },
+    "Google Gemma 4 시리즈": {
+        "title": "Google Gemma 4 시리즈",
+        "description": "2026년 4월 출시된 구글의 최신작. 멀티모달(텍스트, 이미지, 오디오)과 스스로 생각하는 '추론(Thinking)' 모드를 탑재했습니다.",
+        "developer": "Google DeepMind",
+        "architecture": "256K 컨텍스트, 네이티브 함수 호출(Function Calling), E-시리즈(Edge용).",
+        "pros_cons": """**장점 (Pros):**\n- 탁월한 한국어 및 다국어 추론, 기기 내에서 이미지/음성 동시 처리\n\n**단점 (Cons):**\n- 아직 지원되지 않는 구형 로컬 툴들 존재""",
+        "use_cases": "- 학술 논문 분석, 복합 멀티모달 정보 검색",
+        "benchmark": "E-series: 4GB / 대형 모델: 30GB VRAM"
+    },
     "Google Gemma 2 시리즈 (2B, 9B, 27B)": {
         "title": "Google Gemma 2 시리즈 (2B, 9B, 27B)",
-        "description": "제미나이(Gemini) 기술로 빚어낸 강력하고 가벼운 최신 오픈 모델 라인업입니다.",
+        "description": "제미나이(Gemini) 기술로 빚어내어 과거 Llama 3를 위협했던 고성능 2세대 라인업입니다.",
         "developer": "Google DeepMind",
         "architecture": "8K 컨텍스트, Sliding Window Attention 적용.",
-        "pros_cons": """**장점 (Pros):**\n- Llama 3를 위협하는 강력한 벤치마크 점수 및 팩트 정확도\n\n**단점 (Cons):**\n- 특이한 파라미터 수(9B, 27B)로 인한 애매한 VRAM 요구량""",
+        "pros_cons": """**장점 (Pros):**\n- 훌륭한 팩트 정확도와 빠른 한국어 생성\n\n**단점 (Cons):**\n- 특이한 파라미터 수(9B, 27B)로 인한 애매한 VRAM 요구량""",
         "use_cases": "- 학술 논문 분석, 정확한 정보 검색",
         "benchmark": "9B: 6.5GB / 27B: 18GB VRAM"
     },
-    "Google Gemma 1 시리즈 (2B, 7B)": {
-        "title": "Google Gemma 1 시리즈 (2B, 7B)",
-        "description": "Gemma 라인업의 첫 번째 세대 모델입니다.",
-        "developer": "Google DeepMind",
-        "architecture": "Gemma 오리지널 아키텍처.",
-        "pros_cons": """**장점 (Pros):**\n- 모바일(2B)에서도 구동 가능한 범용성\n\n**단점 (Cons):**\n- 한국어 번역투 심함, 잦은 환각(Hallucination)""",
-        "use_cases": "- 저전력 디바이스(Edge) 텍스트 처리",
-        "benchmark": "2B: 2.5GB / 7B: 5.5GB VRAM"
+    "Qwen 3 & 3.7 시리즈 (30B~235B)": {
+        "title": "Qwen 3 & 3.7 시리즈 (30B~235B)",
+        "description": "2025~2026년 출시된 알리바바의 괴물. 에이전틱(Agentic) 기능과 멀티모달로 무장했습니다.",
+        "developer": "Alibaba Cloud",
+        "architecture": "Qwen3-235B(MoE), Qwen3-30B(활성 3B). 2026년 5월 최신 3.7 버전 릴리즈.",
+        "pros_cons": """**장점 (Pros):**\n- 현존 아시아권 최고 성능, 완벽한 한국어 번역 및 코딩 능력, 압도적 속도\n\n**단점 (Cons):**\n- 중국어 기반 지식이 너무 깊어 서구권 문화 답변 간혹 어색함""",
+        "use_cases": "- 전문 다국어 번역기, 코딩 및 에이전트 봇",
+        "benchmark": "30B MoE: 18GB / 235B: 120GB VRAM"
     },
     "Qwen 2 시리즈 (0.5B ~ 72B)": {
         "title": "Qwen 2 시리즈 (0.5B ~ 72B)",
-        "description": "현존 오픈소스 중 최고의 다국어 처리 능력과 코딩 능력을 자랑하는 모델입니다.",
+        "description": "전 세계를 강타했던 Qwen 가문의 2세대 모델. 매우 강력한 수학 능력을 지녔습니다.",
         "developer": "Alibaba Cloud",
         "architecture": "최대 128K 컨텍스트, 29개국어 사전 학습.",
-        "pros_cons": """**장점 (Pros):**\n- 놀랍도록 자연스러운 한국어 구사, 수학/코딩 최상위권\n\n**단점 (Cons):**\n- 서구권 중심의 문화적/역사적 지식 부족""",
-        "use_cases": "- 다국어 번역기, 논리적 수학 문제 풀이",
+        "pros_cons": """**장점 (Pros):**\n- 놀랍도록 자연스러운 한국어 구사, 수학 최상위권\n\n**단점 (Cons):**\n- 구형 아키텍처로 최신 3세대에 점수 밀림""",
+        "use_cases": "- 구형 인프라 다국어 서비스 유지보수",
         "benchmark": "7B: 5.5GB / 72B: 42GB VRAM"
-    },
-    "Qwen 1.5 시리즈 (0.5B ~ 110B)": {
-        "title": "Qwen 1.5 시리즈 (0.5B ~ 110B)",
-        "description": "다양한 파라미터 선택지(14B, 32B 등)를 제공했던 훌륭한 이전 세대 모델입니다.",
-        "developer": "Alibaba Cloud",
-        "architecture": "32K 컨텍스트.",
-        "pros_cons": """**장점 (Pros):**\n- 내 그래픽카드 VRAM에 딱 맞게 고를 수 있는 다양한 체급\n\n**단점 (Cons):**\n- Qwen 2 출시로 인한 성능 우위 상실""",
-        "use_cases": "- 특정 VRAM(16GB 등) 환경에 맞춘 서버 구축",
-        "benchmark": "14B: 9GB / 32B: 20GB VRAM"
     },
     "Qwen-VL / Audio": {
         "title": "Qwen-VL / Audio",
-        "description": "텍스트뿐만 아니라 이미지와 소리까지 이해하는 멀티모달(Multimodal) 모델입니다.",
+        "description": "텍스트뿐만 아니라 이미지와 소리까지 이해하는 멀티모달 1세대 라인업입니다.",
         "developer": "Alibaba Cloud",
         "architecture": "시각 및 청각 인코더가 결합된 아키텍처.",
         "pros_cons": """**장점 (Pros):**\n- 이미지 안의 글씨(OCR)나 상황을 정확히 인식함\n\n**단점 (Cons):**\n- 텍스트 전용 모델보다 VRAM을 훨씬 많이 차지함""",
@@ -80,7 +80,7 @@ MODEL_WIKI_DATA = {
         "description": "SLM(소형언어모델)의 기적. 아주 작은 크기로 GPT-3.5급 논리를 펼칩니다.",
         "developer": "Microsoft",
         "architecture": "교과서(Textbook) 수준의 정제된 고품질 데이터 집중 훈련.",
-        "pros_cons": """**장점 (Pros):**\n- 극도로 적은 VRAM 소모, 압도적인 논리력\n\n**단점 (Cons):**\n- 세상의 모든 지식을 담기엔 모델 뇌가 너무 작아 환각 발생""",
+        "pros_cons": """**장점 (Pros):**\n- 극도로 적은 VRAM 소모, 압도적인 논리력\n\n**단점 (Cons):**\n- 세상의 모든 지식을 담기엔 모델 뇌가 너무 작아 환각 발생 잦음""",
         "use_cases": "- 오프라인 모바일 앱, 단순 텍스트 요약",
         "benchmark": "Mini(3.8B): 3GB / Medium(14B): 9GB VRAM"
     },
@@ -89,15 +89,33 @@ MODEL_WIKI_DATA = {
         "description": "지시 복잡성(Instruction Complexity)을 훈련시켜 명령 수행력을 높인 모델입니다.",
         "developer": "Microsoft/WizardLM",
         "architecture": "Evol-Instruct 기법 적용.",
-        "pros_cons": """**장점 (Pros):**\n- 복잡하고 여러 단계로 꼬인 사용자의 지시를 정확히 따름\n\n**단점 (Cons):**\n- 최신 베이스 모델(Llama 3 등) 미적용 시 성능 한계""",
+        "pros_cons": """**장점 (Pros):**\n- 복잡하고 여러 단계로 꼬인 사용자의 지시를 정확히 따름\n\n**단점 (Cons):**\n- 최신 베이스 모델(Llama 4 등) 미적용 시 한계""",
         "use_cases": "- 복합적인 명령을 내리는 비서",
         "benchmark": "체급별 상이 (5.5GB ~ 40GB)"
     },
-    "Mistral 7B & NeMo 12B": {
-        "title": "Mistral 7B & NeMo 12B",
-        "description": "오픈소스 생태계를 이끌어온 미스트랄의 핵심 단일(Dense) 모델 라인업입니다.",
+    "DeepSeek V2 & Coder V2 (236B)": {
+        "title": "DeepSeek V2 & Coder V2 (236B)",
+        "description": "2024~2025년을 지배한 미친 가성비의 혁신적 MoE 라인업입니다.",
+        "developer": "DeepSeek AI",
+        "architecture": "236B MoE (활성 21B), Multi-Head Latent Attention(MLA) 신기술.",
+        "pros_cons": """**장점 (Pros):**\n- 동급 최고의 속도와 코딩 능력 대비 극히 적은 VRAM 점유(MLA 덕분)\n\n**단점 (Cons):**\n- 설치 및 구동(vLLM 등) 최적화에 난이도 있음""",
+        "use_cases": "- 로컬 최고급 코딩 보조, 복합 챗봇",
+        "benchmark": "활성 21B 기준 24GB VRAM 구동 가능"
+    },
+    "DeepSeek LLM (7B, 67B)": {
+        "title": "DeepSeek LLM (7B, 67B)",
+        "description": "딥시크 기술력의 기반이 되는 강력한 초기 범용 언어 모델입니다.",
+        "developer": "DeepSeek AI",
+        "architecture": "중국어와 영어 중심의 대규모 사전 학습.",
+        "pros_cons": """**장점 (Pros):**\n- 수학적 사고력이 훌륭하고 매우 빠른 응답성\n\n**단점 (Cons):**\n- 한국어 번역이나 대화 시 어색함이 남음""",
+        "use_cases": "- 수학 논문 요약, 영-중 번역",
+        "benchmark": "7B: 5.5GB / 67B: 38GB VRAM"
+    },
+    "Mistral v0.3 & NeMo 12B": {
+        "title": "Mistral v0.3 & NeMo 12B",
+        "description": "오픈소스 생태계를 이끌어온 미스트랄의 강력한 단일(Dense) 최신 모델들입니다.",
         "developer": "Mistral AI",
-        "architecture": "GQA, SWA(Sliding Window Attention), Tekken 토크나이저.",
+        "architecture": "함수 호출(Function Calling) 지원, Tekken 토크나이저.",
         "pros_cons": """**장점 (Pros):**\n- 체급을 뛰어넘는 가성비, 검열이 적은 자유로운 텍스트\n\n**단점 (Cons):**\n- 안전장치가 부족해 상용 서비스 시 필터링 주의""",
         "use_cases": "- 창의적 글쓰기, 웹소설 작성",
         "benchmark": "7B: 5.5GB / 12B: 8GB VRAM"
@@ -110,24 +128,6 @@ MODEL_WIKI_DATA = {
         "pros_cons": """**장점 (Pros):**\n- 거대한 지식량을 가졌음에도 답변 출력 속도가 매우 빠름\n\n**단점 (Cons):**\n- 메모리(VRAM) 자체는 전체 크기만큼 거대하게 다 차지함""",
         "use_cases": "- 기업용 다목적 챗봇, 종합 지식 검색",
         "benchmark": "8x7B: 26GB / 8x22B: 80GB VRAM"
-    },
-    "DeepSeek Coder (1.3B ~ 33B, V2)": {
-        "title": "DeepSeek Coder (1.3B ~ 33B, V2)",
-        "description": "전 세계 수많은 프로그래머들의 로컬 코파일럿으로 쓰이는 코딩 모델입니다.",
-        "developer": "DeepSeek AI",
-        "architecture": "2조 토큰 이상의 방대한 코드 및 수학 데이터 집중 학습.",
-        "pros_cons": """**장점 (Pros):**\n- 어지간한 70B 범용 모델을 압도하는 정교한 코드 작성 능력\n\n**단점 (Cons):**\n- 코딩 이외의 일반 대화는 다소 부자연스러움""",
-        "use_cases": "- 로컬 코드 에디터 연동, 사내 코드 리뷰",
-        "benchmark": "6.7B: 5.5GB / 33B: 20GB VRAM"
-    },
-    "DeepSeek LLM (7B, 67B)": {
-        "title": "DeepSeek LLM (7B, 67B)",
-        "description": "딥시크 기술력의 기반이 되는 강력한 범용 언어 모델입니다.",
-        "developer": "DeepSeek AI",
-        "architecture": "중국어와 영어 중심의 대규모 사전 학습.",
-        "pros_cons": """**장점 (Pros):**\n- 수학적 사고력이 훌륭하고 매우 빠른 응답성\n\n**단점 (Cons):**\n- 한국어 번역이나 대화 시 어색함이 남음""",
-        "use_cases": "- 수학 논문 요약, 영-중 번역",
-        "benchmark": "7B: 5.5GB / 67B: 38GB VRAM"
     },
     "Upstage Solar 10.7B": {
         "title": "Upstage Solar 10.7B",
@@ -143,16 +143,52 @@ MODEL_WIKI_DATA = {
         "description": "Solar 10.7B의 성공을 잇는 최신 업그레이드 버전입니다.",
         "developer": "Upstage",
         "architecture": "대폭 개선된 한국어 튜닝 및 컨텍스트 확장.",
-        "pros_cons": """**장점 (Pros):**\n- 더욱 매끄러워진 한국어 문장력과 논리 추론\n\n**단점 (Cons):**\n- 해외 모델 대비 상대적으로 좁은 생태계 지원""",
+        "pros_cons": """**장점 (Pros):**\n- 가장 완벽하고 자연스러운 한국어 문장력과 논리 추론\n\n**단점 (Cons):**\n- 해외 모델 대비 상대적으로 좁은 생태계 지원""",
         "use_cases": "- 국내 기업용 사내망 AI 엔진",
         "benchmark": "8GB VRAM"
     },
+    "Command R+ (104B)": {
+        "title": "Command R+ (104B)",
+        "description": "RAG(검색 증강 생성) 성능을 극한으로 끌어올린 엔터프라이즈급 거대 모델입니다.",
+        "developer": "Cohere",
+        "architecture": "104B 파라미터, 도구 사용(Tool Use) 특화, 128K 컨텍스트.",
+        "pros_cons": """**장점 (Pros):**\n- 오픈소스 최고 수준의 정확도와 환각(Hallucination) 억제 능력\n\n**단점 (Cons):**\n- 개인 장비로는 구동하기 힘든 무거운 체급""",
+        "use_cases": "- 기업 사내 문서 기반 검색(RAG) 시스템",
+        "benchmark": "최소 60GB VRAM"
+    },
+    "Command R (35B)": {
+        "title": "Command R (35B)",
+        "description": "Command R+의 동생 격으로, 3090/4090 환경에서 최적의 RAG 효율을 냅니다.",
+        "developer": "Cohere",
+        "architecture": "35B 파라미터.",
+        "pros_cons": """**장점 (Pros):**\n- 주어진 문서를 바탕으로 가장 정확하게 답변을 뽑아냄\n\n**단점 (Cons):**\n- 범용적인 챗봇 대화로는 매력이 다소 떨어짐""",
+        "use_cases": "- 학술 논문/법률 문서 팩트체크",
+        "benchmark": "22GB VRAM"
+    },
+    "Grok-1.5 (초거대 MoE)": {
+        "title": "Grok-1.5 (초거대 MoE)",
+        "description": "일론 머스크의 xAI가 공개한 그록 시리즈. 오픈소스 생태계에 큰 충격을 주었습니다.",
+        "developer": "xAI",
+        "architecture": "거대한 파라미터의 MoE 아키텍처, 128K 긴 컨텍스트.",
+        "pros_cons": """**장점 (Pros):**\n- 방대한 글로벌 상식, 유머러스하고 제한 없는 재치 있는 답변 스타일\n\n**단점 (Cons):**\n- 일반 데스크탑에서는 구동 불가능한 무시무시한 용량""",
+        "use_cases": "- 대규모 AI 클러스터 및 슈퍼컴퓨터 연구용",
+        "benchmark": "최소 200GB VRAM 이상"
+    },
+    "DBRX (132B)": {
+        "title": "DBRX (132B)",
+        "description": "데이터브릭스가 공개한 132B 크기의 초대형 오픈소스 MoE 모델입니다.",
+        "developer": "Databricks",
+        "architecture": "세밀한 MoE (Fine-grained Mixture-of-Experts) 아키텍처.",
+        "pros_cons": """**장점 (Pros):**\n- 빠른 속도와 강력한 코딩/수학/논리 퍼포먼스\n\n**단점 (Cons):**\n- 무거운 용량""",
+        "use_cases": "- 대규모 기업용 분석 시스템",
+        "benchmark": "80GB VRAM 이상"
+    },
     "Falcon (7B, 40B, 180B)": {
         "title": "Falcon (7B, 40B, 180B)",
-        "description": "UAE에서 막대한 자본으로 훈련시켜 상업적 무료로 푼 혁신적 모델 라인업입니다.",
+        "description": "UAE에서 막대한 자본으로 훈련시켜 상업용 완전 무료로 푼 혁신적 라인업입니다.",
         "developer": "TII",
         "architecture": "커스텀 트랜스포머 아키텍처.",
-        "pros_cons": """**장점 (Pros):**\n- 상업적 제약이 전혀 없는 완전한 오픈 라이선스, 방대한 지식(180B)\n\n**단점 (Cons):**\n- 구형 아키텍처로 인한 속도 및 토큰 효율성 저하""",
+        "pros_cons": """**장점 (Pros):**\n- 상업적 제약이 전혀 없는 완전한 오픈 라이선스\n\n**단점 (Cons):**\n- 구형 아키텍처로 인한 속도 및 최신 모델 대비 토큰 효율성 저하""",
         "use_cases": "- 라이선스 제약 없는 상용 서비스망 구축",
         "benchmark": "40B: 24GB / 180B: 100GB 이상"
     },
@@ -164,42 +200,6 @@ MODEL_WIKI_DATA = {
         "pros_cons": """**장점 (Pros):**\n- 소설책 수십 권 분량을 한 번에 기억하는 엄청난 장기 기억력\n\n**단점 (Cons):**\n- 긴 컨텍스트 사용 시 급격히 증가하는 VRAM 소모량""",
         "use_cases": "- 장편 소설 번역, 방대한 법률/의료 문서 검토",
         "benchmark": "6B: 5GB / 34B: 22GB VRAM"
-    },
-    "Command R (35B)": {
-        "title": "Command R (35B)",
-        "description": "RAG(검색 증강 생성)와 외부 도구(API) 사용에 극도로 특화된 모델입니다.",
-        "developer": "Cohere",
-        "architecture": "35B 파라미터, 도구 사용(Tool Use) 특화 학습, 128K 컨텍스트.",
-        "pros_cons": """**장점 (Pros):**\n- 주어진 문서를 바탕으로 가장 정확하게 답변을 뽑아냄 (환각 최소화)\n\n**단점 (Cons):**\n- 로컬 구동 시 무거운 체급""",
-        "use_cases": "- 기업 사내 문서 기반 검색(RAG) 시스템",
-        "benchmark": "22GB VRAM"
-    },
-    "Command R+ (104B)": {
-        "title": "Command R+ (104B)",
-        "description": "Command R의 성능을 극한으로 끌어올린 엔터프라이즈급 104B 거대 모델입니다.",
-        "developer": "Cohere",
-        "architecture": "104B 파라미터, 다국어 RAG 성능 최적화.",
-        "pros_cons": """**장점 (Pros):**\n- 오픈소스 최고 수준의 정확도와 도구 제어 능력\n\n**단점 (Cons):**\n- 개인 장비로는 절대 불가능한 엄청난 하드웨어 요구""",
-        "use_cases": "- 거대 데이터센터용 복합 에이전트 구축",
-        "benchmark": "최소 60GB VRAM"
-    },
-    "DBRX (132B)": {
-        "title": "DBRX (132B)",
-        "description": "데이터브릭스가 공개한 132B 크기의 초대형 오픈소스 MoE 모델입니다.",
-        "developer": "Databricks",
-        "architecture": "세밀한 MoE (Fine-grained Mixture-of-Experts) 아키텍처.",
-        "pros_cons": """**장점 (Pros):**\n- 빠른 속도와 강력한 코딩/수학/논리 퍼포먼스\n\n**단점 (Cons):**\n- 무거운 용량""",
-        "use_cases": "- 대규모 기업용 분석 시스템",
-        "benchmark": "80GB VRAM 이상"
-    },
-    "Grok-1 (314B)": {
-        "title": "Grok-1 (314B)",
-        "description": "일론 머스크의 xAI가 공개한 현존 최대 크기의 314B 오픈소스 모델입니다.",
-        "developer": "xAI",
-        "architecture": "MoE 아키텍처, 314B 파라미터.",
-        "pros_cons": """**장점 (Pros):**\n- 상상을 초월하는 거대한 지식량과 재치 있는 답변 스타일\n\n**단점 (Cons):**\n- 슈퍼컴퓨터 급 장비가 아니면 다운로드조차 부담스러움""",
-        "use_cases": "- 대규모 AI 클러스터 연구용",
-        "benchmark": "최소 200GB VRAM 이상"
     },
     "Vicuna (7B, 13B, 33B)": {
         "title": "Vicuna (7B, 13B, 33B)",
@@ -246,12 +246,12 @@ MODEL_WIKI_DATA = {
         "use_cases": "- VSC 백그라운드 자동완성 서버",
         "benchmark": "15B: 10GB VRAM"
     },
-    "Jamba": {
-        "title": "Jamba",
-        "description": "전통적인 트랜스포머의 한계를 깬 혁신적인 하이브리드 모델입니다.",
+    "Jamba 1.5": {
+        "title": "Jamba 1.5",
+        "description": "전통적인 트랜스포머의 한계를 깬 혁신적인 하이브리드 최신 모델입니다.",
         "developer": "AI21 Labs",
-        "architecture": "Mamba (SSM) + Transformer 하이브리드 아키텍처.",
-        "pros_cons": """**장점 (Pros):**\n- 엄청나게 긴 텍스트를 처리할 때도 VRAM과 연산량이 크게 늘지 않음\n\n**단점 (Cons):**\n- 아직 지원하는 생태계 툴(Ollama 등)이 제한적임""",
+        "architecture": "Mamba 2 (SSM) + Transformer 하이브리드 아키텍처.",
+        "pros_cons": """**장점 (Pros):**\n- 엄청나게 긴 텍스트를 처리할 때도 VRAM과 연산량이 크게 늘지 않음\n\n**단점 (Cons):**\n- 아직 지원하는 생태계 툴(Ollama 등)이 일부 제한적임""",
         "use_cases": "- 장편 소설 한 권 전체 분석",
         "benchmark": "12GB VRAM"
     },
@@ -291,12 +291,12 @@ MODEL_WIKI_DATA = {
         "use_cases": "- 시니어 개발자의 코드 디버깅 보조",
         "benchmark": "22GB VRAM"
     },
-    "InternLM 2 (1.8B, 7B, 20B)": {
-        "title": "InternLM 2 (1.8B, 7B, 20B)",
-        "description": "중국 상하이 AI 연구소에서 개발한 매우 긴 텍스트 처리 전문 모델입니다.",
+    "InternLM 2.5 (1.8B, 7B, 20B)": {
+        "title": "InternLM 2.5 (1.8B, 7B, 20B)",
+        "description": "중국 상하이 AI 연구소에서 개발한 매우 긴 텍스트 처리 전문 최신 모델입니다.",
         "developer": "Shanghai AI Lab",
-        "architecture": "최대 200K 컨텍스트, 탁월한 문서 요약력.",
-        "pros_cons": """**장점 (Pros):**\n- 거대한 문서를 통째로 넣고 요약할 때 정보 누락이 적음\n\n**단점 (Cons):**\n- 중국어 편향성 존재""",
+        "architecture": "최대 1000K 컨텍스트, 탁월한 문서 요약력.",
+        "pros_cons": """**장점 (Pros):**\n- 거대한 문서를 통째로 넣고 요약할 때 정보 누락이 가장 적음\n\n**단점 (Cons):**\n- 중국어 편향성 존재""",
         "use_cases": "- 기업용 대규모 문서 분석기",
         "benchmark": "20B: 14GB VRAM"
     },
@@ -309,21 +309,21 @@ MODEL_WIKI_DATA = {
         "use_cases": "- 중화권 타겟 서비스 엔진",
         "benchmark": "13B: 8.5GB VRAM"
     },
-    "ChatGLM 3 (6B)": {
-        "title": "ChatGLM 3 (6B)",
-        "description": "칭화대 연구진이 만든 중국 최초의 걸작 6B 모델입니다.",
+    "ChatGLM 4": {
+        "title": "ChatGLM 4",
+        "description": "칭화대 연구진이 만든 고성능 최신 4세대 GLM 아키텍처 모델입니다.",
         "developer": "Tsinghua Univ",
-        "architecture": "효율적인 GLM 아키텍처 도입.",
-        "pros_cons": """**장점 (Pros):**\n- 낮은 VRAM 소모량 대비 탁월한 지식 검색 능력\n\n**단점 (Cons):**\n- 영-중 외의 다국어(한국어)는 사실상 불가능""",
-        "use_cases": "- 연구용 레퍼런스",
-        "benchmark": "5GB VRAM"
+        "architecture": "128K 지원 효율적인 GLM 아키텍처 도입.",
+        "pros_cons": """**장점 (Pros):**\n- 낮은 VRAM 소모량 대비 탁월한 지식 검색과 다국어 능력\n\n**단점 (Cons):**\n- 구동 환경 세팅의 번거로움""",
+        "use_cases": "- 연구용 다국어 챗봇",
+        "benchmark": "9GB VRAM"
     },
     "Orion 14B": {
         "title": "Orion 14B",
         "description": "2.5조 토큰의 다국어 훈련을 받은 강력한 중형급 모델입니다.",
         "developer": "OrionStar",
         "architecture": "아시아 언어 처리에 특화된 14B 체급.",
-        "pros_cons": """**장점 (Pros):**\n- 일본어, 한국어 등 다국어 처리 효율이 상당히 높음\n\n**단점 (Cons):**\n- Qwen 시리즈의 그늘에 가려진 인지도""",
+        "pros_cons": """**장점 (Pros):**\n- 일본어, 한국어 등 다국어 처리 효율이 상당히 높음\n\n**단점 (Cons):**\n- Qwen 3의 등장으로 가려진 인지도""",
         "use_cases": "- 아시아 통합 다국어 챗봇",
         "benchmark": "9GB VRAM"
     },
@@ -332,36 +332,36 @@ MODEL_WIKI_DATA = {
         "description": "대규모 다국어 말뭉치를 집중적으로 훈련받은 모델입니다.",
         "developer": "Xverse",
         "architecture": "3.2조 토큰의 거대 데이터셋 학습.",
-        "pros_cons": """**장점 (Pros):**\n- 65B 모델의 경우 GPT-3.5를 압도하는 훌륭한 추론력\n\n**단점 (Cons):**\n- 마찬가지로 중국어 중심의 편향""",
+        "pros_cons": """**장점 (Pros):**\n- 65B 모델의 경우 거대한 추론력을 자랑\n\n**단점 (Cons):**\n- 마찬가지로 중국어 중심의 편향""",
         "use_cases": "- 대형 코퍼스 연구용",
         "benchmark": "65B: 38GB VRAM"
     },
     "Aya 23 (8B, 35B)": {
         "title": "Aya 23 (8B, 35B)",
-        "description": "무려 23개의 언어를 원어민처럼 구사하기 위해 특별히 만들어진 다국어 최적화 모델입니다.",
+        "description": "무려 23개의 언어를 원어민처럼 구사하기 위해 특별히 만들어진 다국어 튜닝 모델입니다.",
         "developer": "Cohere",
         "architecture": "다국어 특별 파인튜닝, Command R 베이스.",
-        "pros_cons": """**장점 (Pros):**\n- 한국어를 포함한 23개 언어를 놀랍도록 매끄럽게 번역하고 이해함\n\n**단점 (Cons):**\n- 영어 전용 모델에 비해 코딩 능력이 살짝 떨어짐""",
+        "pros_cons": """**장점 (Pros):**\n- 한국어를 포함한 23개 언어를 놀랍도록 매끄럽게 번역하고 이해함\n\n**단점 (Cons):**\n- 코딩 성능은 최신 모델 대비 살짝 아쉬움""",
         "use_cases": "- 글로벌 번역기, 다국어 CS 봇",
         "benchmark": "8B: 6GB / 35B: 22GB VRAM"
     },
-    "Breeze 7B (대만)": {
-        "title": "Breeze 7B (대만)",
-        "description": "대만의 미디어텍(MediaTek)에서 번체 중국어(Taiwanese)에 특화시켜 만든 모델입니다.",
-        "developer": "MediaTek",
-        "architecture": "Mistral 7B 기반 번체 튜닝.",
-        "pros_cons": """**장점 (Pros):**\n- 대만의 문화와 번체 한자를 가장 완벽하게 묘사함\n\n**단점 (Cons):**\n- 한국인에게는 필요성이 매우 낮음""",
-        "use_cases": "- 대만 타겟 서비스 특화 봇",
-        "benchmark": "5.5GB VRAM"
-    },
-    "SeaLLM (7B, 13B)": {
-        "title": "SeaLLM (7B, 13B)",
-        "description": "동남아시아(SEA) 지역의 마이너한 언어들을 완벽하게 커버하기 위한 모델입니다.",
+    "SeaLLM 3": {
+        "title": "SeaLLM 3",
+        "description": "동남아시아(SEA) 지역의 마이너한 언어들을 완벽하게 커버하기 위한 특화 모델입니다.",
         "developer": "Alibaba",
         "architecture": "태국어, 베트남어, 인니어 등 소수 언어 집중 훈련.",
         "pros_cons": """**장점 (Pros):**\n- 구글 번역기도 잘 못하는 동남아 소수 언어를 찰떡같이 번역함\n\n**단점 (Cons):**\n- 일반 범용 목적으론 활용도 낮음""",
         "use_cases": "- 동남아 현지화 및 글로벌 게임 서비스",
-        "benchmark": "13B: 8.5GB VRAM"
+        "benchmark": "8GB VRAM"
+    },
+    "OpenHermes 2.5": {
+        "title": "OpenHermes 2.5",
+        "description": "수많은 데이터셋을 기가 막히게 배합하여 만든 역대 최고의 7B 튜닝 모델입니다.",
+        "developer": "Teknium",
+        "architecture": "Mistral 7B 베이스, 엄청난 양의 커스텀 데이터셋 조합.",
+        "pros_cons": """**장점 (Pros):**\n- 마치 실제 사람 비서처럼 코딩부터 일상 대화까지 센스 있게 대답함\n\n**단점 (Cons):**\n- 베이스가 구형이라 최신 Llama 4에 스펙은 밀림""",
+        "use_cases": "- 로컬 챗봇의 훌륭한 UI/UX 레퍼런스",
+        "benchmark": "5.5GB VRAM"
     },
 
 }
@@ -370,7 +370,7 @@ def render():
     st.title("📖 모델 사전 (LLM Model Wiki)")
     st.markdown('''
     이 페이지에서는 글로벌 리더보드를 장악하고 있는 **세계 최고 수준의 오픈소스 로컬 LLM 40종**에 대한 깊이 있는 정보를 제공합니다. 
-    파라미터 체급별 중복 모델을 통합하여, 서로 다른 아키텍처와 특성을 가진 40개의 거대한 모델 가문(Family)을 소개합니다.
+    **[2026년 6월 최신 업데이트]** Llama 4, Gemma 4, Qwen 3 등 가장 최신 트렌드를 반영한 40개의 거대한 모델 가문(Family)을 소개합니다.
     로컬 환경(내 PC)에 모델을 다운로드하기 전에, 아래 사전을 참고하여 내 PC 사양과 사용 목적에 딱 맞는 모델을 찾아보세요!
     ''')
     st.divider()
@@ -378,7 +378,7 @@ def render():
     # ---------------------------------------------------------
     # 검색 기능
     # ---------------------------------------------------------
-    search_query = st.text_input("🔍 모델명 검색 (예: Llama, Qwen, Coder)", placeholder="검색어를 입력하세요...")
+    search_query = st.text_input("🔍 모델명 검색 (예: Llama, Gemma, Qwen)", placeholder="검색어를 입력하세요...")
     all_models = list(MODEL_WIKI_DATA.keys())
     if search_query:
         models_list = [m for m in all_models if search_query.lower() in m.lower()]
