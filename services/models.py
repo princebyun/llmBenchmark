@@ -1,5 +1,6 @@
 import re
 import requests
+from config import OLLAMA_PORT, LMSTUDIO_PORT, VLLM_PORT
 
 def extract_params_from_name(name):
     """모델 이름에서 파라미터 수(예: 8b, 7B)를 정규식으로 추출합니다."""
@@ -12,7 +13,7 @@ def get_ollama_models(target_ip="localhost"):
     """Ollama 서버에서 모델 목록과 실제 파라미터 크기를 가져옵니다."""
     models = []
     try:
-        response = requests.get(f"http://{target_ip}:11434/api/tags", timeout=2)
+        response = requests.get(f"http://{target_ip}:{OLLAMA_PORT}/api/tags", timeout=2)
         if response.status_code == 200:
             data = response.json()
             for model in data.get("models", []):
@@ -60,8 +61,8 @@ def get_all_models(target_ip="localhost"):
     models = get_ollama_models(target_ip)
     # 각 모델 소스별로 포트 저장
     for m in models:
-        m["port"] = 11434
+        m["port"] = OLLAMA_PORT
         
-    models += get_openai_compatible_models(target_ip, port=1234, source_name="LM Studio")
-    models += get_openai_compatible_models(target_ip, port=8000, source_name="vLLM / oMLX")
+    models += get_openai_compatible_models(target_ip, port=LMSTUDIO_PORT, source_name="LM Studio")
+    models += get_openai_compatible_models(target_ip, port=VLLM_PORT, source_name="vLLM / oMLX")
     return models

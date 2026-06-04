@@ -1,10 +1,7 @@
 import time
 import json
 import requests
-
-MAX_TOKENS = 1000  # 비정상적으로 긴 출력을 방지하기 위한 최대 토큰 수 제한
-MAX_TIME_SECONDS = 120  # 최대 테스트 시간 (초) - 무한 대기 방지
-
+from config import MAX_TOKENS, MAX_TIME_SECONDS, REQUEST_TIMEOUT
 def get_baseline_tps(model_info):
     """모델의 실제 파라미터 수를 기반으로 동적 기준 TPS를 계산합니다."""
     params = model_info.get("params", 0)
@@ -36,8 +33,8 @@ def benchmark_model(model_info, target_ip="localhost", prompt_text="", progress_
                 "messages": [{"role": "user", "content": prompt_text}],
                 "stream": True
             }
-            # 초기 로딩(콜드스타트) 대기를 위해 60초 타임아웃 부여
-            response = requests.post(url, json=payload, stream=True, timeout=60)
+            # 초기 로딩(콜드스타트) 대기를 위해 타임아웃 부여
+            response = requests.post(url, json=payload, stream=True, timeout=REQUEST_TIMEOUT)
             response.raise_for_status()
             
             for line in response.iter_lines():
@@ -85,8 +82,8 @@ def benchmark_model(model_info, target_ip="localhost", prompt_text="", progress_
                 "stream": True,
                 "stream_options": {"include_usage": True}
             }
-            # 초기 로딩(콜드스타트) 대기를 위해 60초 타임아웃 부여
-            response = requests.post(url, json=payload, stream=True, timeout=60)
+            # 초기 로딩(콜드스타트) 대기를 위해 타임아웃 부여
+            response = requests.post(url, json=payload, stream=True, timeout=REQUEST_TIMEOUT)
             response.raise_for_status()
             
             for line in response.iter_lines():

@@ -2,10 +2,18 @@ import streamlit as st
 import pandas as pd
 import plotly.graph_objects as go
 from services.history import load_benchmark_history
+import base64
+
+def get_csv_download_link(df):
+    """데이터프레임을 CSV로 변환하여 다운로드 링크를 생성합니다."""
+    csv = df.to_csv(index=False, encoding='utf-8-sig')
+    b64 = base64.b64encode(csv.encode()).decode()
+    href = f'<a href="data:file/csv;base64,{b64}" download="benchmark_history.csv" class="btn">📥 CSV 파일로 내보내기</a>'
+    return href
 
 def render():
     st.subheader("📊 벤치마크 이력 및 비교")
-    st.markdown("과거에 진행했던 벤치마크 결과들이 자동으로 저장되어 표시됩니다. 모델 간 성능을 비교하거나 하드웨어 변경에 따른 성능 변화를 추적하세요.")
+    st.markdown("과거에 진행했던 벤치마크 결과들이 자동으로 저장되어 표시됩니다. (현재 세션 기반 유지)")
     
     history_data = load_benchmark_history()
     
@@ -13,8 +21,11 @@ def render():
         st.info("아직 저장된 벤치마크 이력이 없습니다. '내 하드웨어 진단' 탭에서 벤치마크를 한 번 실행해 보세요!")
     else:
         df_history = pd.DataFrame(history_data)
-        
         df_history = df_history.sort_values(by="측정 일시", ascending=False)
+        
+        # CSV 다운로드 버튼
+        st.markdown(get_csv_download_link(df_history), unsafe_allow_html=True)
+        st.markdown("<br>", unsafe_allow_html=True)
         
         st.dataframe(
             df_history,
@@ -25,14 +36,8 @@ def render():
         st.markdown("---")
         st.subheader("📈 모델별 평균 성능(TPS) 비교")
         
-        # 과거 데이터 하위 호환성 (TPS 컬럼명을 클라이언트 TPS로 처리)
-        if "클라이언트 TPS" not in df_history.columns and "TPS" in df_history.columns:
-            df_history["클라이언트 TPS"] = df_history["TPS"]
-            
-        # 차트에는 더 정확한 '서버 TPS'를 우선 사용하되, 없으면 '클라이언트 TPS' 사용
         if "서버 TPS" in df_history.columns:
             target_col = "서버 TPS"
-            # 구버전 데이터의 NaN 채우기
             df_history["서버 TPS"] = df_history["서버 TPS"].fillna(df_history.get("클라이언트 TPS", df_history.get("TPS")))
         else:
             target_col = "클라이언트 TPS" if "클라이언트 TPS" in df_history.columns else "TPS"
@@ -44,7 +49,7 @@ def render():
             x=avg_tps[target_col],
             y=avg_tps["모델명"],
             orientation='h',
-            marker=dict(color='#1f77b4')
+            marker=dict(color='#4F46E5')
         ))
         fig.update_layout(
             title="모델별 평균 TPS (초당 토큰 처리량)",
@@ -57,4 +62,5 @@ def render():
         if st.button("🗑️ 모든 이력 지우기", type="secondary"):
             from services.history import clear_benchmark_history
             clear_benchmark_history()
-            st.success("모든 벤치마크 이력이 삭제되었습니다. (새로고침 시 빈 화면이 표시됩니다)")
+            st.success("모든 벤치마크 이력이 삭제되었습니다.")
+            st.rerun()
