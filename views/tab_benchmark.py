@@ -148,20 +148,20 @@ def render():
         <script>
         const doc = window.parent.document;
         const observer = new MutationObserver(() => {
-            const listbox = doc.querySelector('ul[role="listbox"]') || doc.querySelector('div[role="listbox"]');
+            const listbox = doc.querySelector('[role="listbox"]');
             if (listbox) {
-                const options = listbox.querySelectorAll('li[role="option"]');
+                const options = listbox.querySelectorAll('[role="option"]');
                 options.forEach(option => {
                     if (!option.dataset.listenerAttached) {
                         option.dataset.listenerAttached = 'true';
                         option.addEventListener('click', () => {
                             setTimeout(() => {
-                                // 리액트가 바깥 클릭으로 인식하도록 mousedown과 click 이벤트 발생
-                                const target = doc.querySelector('.stApp') || doc.body;
-                                target.dispatchEvent(new MouseEvent('mousedown', { bubbles: true, cancelable: true, clientX: 0, clientY: 0 }));
-                                target.dispatchEvent(new MouseEvent('mouseup', { bubbles: true, cancelable: true, clientX: 0, clientY: 0 }));
-                                target.dispatchEvent(new MouseEvent('click', { bubbles: true, cancelable: true, clientX: 0, clientY: 0 }));
-                            }, 100);
+                                // 옵션을 클릭하면 즉시 모든 select input의 포커스를 해제(blur)하여 목록을 강제로 닫음
+                                const inputs = doc.querySelectorAll('div[data-baseweb="select"] input');
+                                inputs.forEach(input => {
+                                    input.blur();
+                                });
+                            }, 10);
                         });
                     }
                 });
