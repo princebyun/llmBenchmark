@@ -76,6 +76,23 @@ def render():
         
     st.caption("외부 기기를 벤치마크하려면 해당 기기의 IP를 입력하세요. 서버 관리용 메타데이터 IP 등은 보안상 차단됩니다.")
     
+    with st.expander("💡 외부 기기 방화벽 및 접속 허용 설정 방법 보기"):
+        st.markdown("""
+        **1. Ollama의 경우 (서버 PC에서 설정 후 재시작):**
+        - **Windows:** 명령 프롬프트에서 `set OLLAMA_HOST=0.0.0.0` 및 `set OLLAMA_ORIGINS="*"` 입력 후 `ollama serve` 실행
+        - **Mac/Linux:** 터미널에서 `export OLLAMA_HOST=0.0.0.0` 및 `export OLLAMA_ORIGINS="*"` 입력 후 `ollama serve` 실행
+        
+        **2. LM Studio의 경우:**
+        - 개발자 옵션(Local Server 탭)에서 `Cross-Origin-Resource-Sharing (CORS)` 활성화
+        - 외부 IP가 접근할 수 있도록 포트(1234) 방화벽 해제
+        
+        **3. vLLM의 경우:**
+        - 서버 실행 명령어에 `--host 0.0.0.0` 옵션을 추가하여 실행하세요. (예: `python -m vllm.entrypoints.openai.api_server --host 0.0.0.0 --model <모델명>`)
+        
+        **4. oMLX의 경우:**
+        - 서버 실행 명령어에 `--host 0.0.0.0` 옵션을 추가하여 실행하거나, 앱 내 네트워크 설정에서 외부 접속을 허용해 주세요.
+        """)
+    
     # 3. 모델 스캔
     if "available_models" not in st.session_state:
         if target_ip.strip() == "":
