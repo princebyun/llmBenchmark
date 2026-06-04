@@ -1,5 +1,7 @@
 import ipaddress
 
+from typing import Tuple
+
 BLOCKED_RANGES = [
     ipaddress.ip_network("169.254.0.0/16"),   # 클라우드 메타데이터 (AWS/GCP/Oracle)
     ipaddress.ip_network("100.64.0.0/10"),    # CGNAT
@@ -7,7 +9,7 @@ BLOCKED_RANGES = [
     ipaddress.ip_network("224.0.0.0/4"),      # 멀티캐스트
 ]
 
-def validate_target_ip(ip_str: str) -> tuple[bool, str]:
+def validate_target_ip(ip_str: str) -> Tuple[bool, str]:
     """
     입력된 IP가 외부 접근에 안전한지 검증합니다.
     (로컬 진단 모드이므로 사설 IP나 localhost는 허용하되, 오라클 서버 자체의 메타데이터 등 민감한 IP만 차단합니다)
