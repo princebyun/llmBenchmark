@@ -91,6 +91,26 @@
             <select id="model-select"></select>
             <button id="add-queue-btn" class="btn" style="background-color: #6366F1;">대기열에 추가</button>
         </div>
+        
+        <div id="cors-error-msg" style="display:none; margin-top:15px; background-color: #FEF2F2; border: 1px solid #F87171; border-radius: 6px; padding: 15px;">
+            <h4 style="color: #DC2626; margin-bottom: 8px;">🚨 로컬 모델 스캔 실패 (CORS 에러)</h4>
+            <p style="font-size: 13px; color: #4B5563; margin-top:0;">
+                Ollama가 꺼져 있거나 브라우저 보안 정책(CORS)에 의해 연결이 차단되었습니다.<br>
+                <strong>아래 안내에 따라 OLLAMA_ORIGINS 설정을 추가하고 완전히 재시작해주세요.</strong>
+            </p>
+            <div style="font-size: 13px; color: #1F2937; margin-top: 10px;">
+                <strong>🖥️ 윈도우(Windows):</strong><br>
+                1. 우측 하단 시계 옆 트레이에서 🦙 아이콘 우클릭 -> <b>Quit Ollama</b> (완전 종료)<br>
+                2. 시작 메뉴 -> "환경 변수 편집" 검색 및 실행 -> 맨 아래 [환경 변수] 클릭<br>
+                3. 시스템 변수 [새로 만들기] -> 변수: <code>OLLAMA_ORIGINS</code> / 값: <code>*</code><br>
+                4. 확인 후 Ollama 재실행<br><br>
+                <strong>🍎 맥(Mac):</strong><br>
+                1. 상단 메뉴바에서 🦙 아이콘 클릭 -> <b>Quit Ollama</b> (완전 종료)<br>
+                2. 터미널(Terminal)을 열고 아래 명령어 실행:<br>
+                <code>launchctl setenv OLLAMA_ORIGINS "*"</code><br>
+                3. 바탕화면에서 Ollama 앱 다시 실행
+            </div>
+        </div>
     </div>
 
     <div id="queue-section" class="card" style="display:none;">
@@ -226,6 +246,7 @@
             scanBtn.innerText = "내 PC 스캔 완료 (다시 스캔)";
 
             if (availableModels.length > 0) {
+                document.getElementById('cors-error-msg').style.display = "none";
                 modelSelectArea.style.display = "block";
                 modelSelect.innerHTML = "";
                 
@@ -240,7 +261,7 @@
                 });
             } else {
                 modelSelectArea.style.display = "none";
-                alert("감지된 로컬 모델이 없습니다. Ollama, LM Studio 등이 실행 중인지 확인하세요. (CORS 권한 필요)");
+                document.getElementById('cors-error-msg').style.display = "block";
             }
             setFrameHeight();
         }
