@@ -20,7 +20,10 @@ def save_benchmark_history(model_info, prompt_category, result, target_tps):
         "파라미터 (B)": model_info["params"],
         "프롬프트 유형": prompt_category,
         "TTFT (s)": round(result["ttft"], 2),
-        "TPS": round(result["tps"], 1),
+        "서버 TPS": round(result.get("server_tps", result["tps"]), 1),
+        "클라이언트 TPS": round(result["tps"], 1),
+        "프롬프트 TPS": round(result.get("prompt_tps", 0) or 0, 1),
+        "모델 로딩 시간 (s)": round(result.get("load_time", 0) or 0, 2),
         "기준 TPS": round(target_tps, 1),
         "달성률 (%)": round((result["tps"] / target_tps * 100) if target_tps > 0 else 0, 1)
     })

@@ -22,6 +22,12 @@ def benchmark_model(model_info, target_ip="localhost", prompt_text="", progress_
     token_count = 0
     full_response = ""
     
+    # 상세 지표용 변수
+    server_tps = None
+    prompt_tps = None
+    load_time = None
+    server_token_count = None
+    
     try:
         if source == "Ollama":
             url = f"http://{target_ip}:11434/api/chat"
@@ -51,6 +57,17 @@ def benchmark_model(model_info, target_ip="localhost", prompt_text="", progress_
                             progress_placeholder.info(f"⏳ **벤치마크 진행 중...** 현재 {token_count}개의 토큰을 처리했습니다.")
                     
                     if data.get("done", False):
+                        load_time = data.get("load_duration", 0) / 1e9
+                        prompt_eval_count = data.get("prompt_eval_count", 0)
+                        prompt_eval_duration = data.get("prompt_eval_duration", 0) / 1e9
+                        eval_count = data.get("eval_count", 0)
+                        eval_duration = data.get("eval_duration", 0) / 1e9
+                        
+                        if prompt_eval_duration > 0:
+                            prompt_tps = prompt_eval_count / prompt_eval_duration
+                        if eval_duration > 0:
+                            server_tps = eval_count / eval_duration
+                        server_token_count = eval_count
                         break
                         
                     if token_count >= MAX_TOKENS:
@@ -58,12 +75,14 @@ def benchmark_model(model_info, target_ip="localhost", prompt_text="", progress_
                             progress_placeholder.warning("⚠️ 최대 토큰 수 초과로 측정을 강제 종료했습니다.")
                         break
                         
-        elif source == "LM Studio":
-            url = f"http://{target_ip}:1234/v1/chat/completions"
+        elif source in ["LM Studio", "vLLM / oMLX"]:
+            port = model_info.get("port", 1234)
+            url = f"http://{target_ip}:{port}/v1/chat/completions"
             payload = {
                 "model": model_name,
                 "messages": [{"role": "user", "content": prompt_text}],
-                "stream": True
+                "stream": True,
+                "stream_options": {"include_usage": True}
             }
             response = requests.post(url, json=payload, stream=True, timeout=30)
             response.raise_for_status()
@@ -84,11 +103,18 @@ def benchmark_model(model_info, target_ip="localhost", prompt_text="", progress_
                     data = json.loads(data_str)
                     if "choices" in data and len(data["choices"]) > 0:
                         delta = data["choices"][0].get("delta", {})
-                        if "content" in delta:
+                        if "content" in delta and delta["content"] is not None:
                             full_response += delta["content"]
                             token_count += 1
                             if progress_placeholder:
                                 progress_placeholder.info(f"⏳ **벤치마크 진행 중...** 현재 {token_count}개의 토큰을 처리했습니다.")
+                                
+                    if "usage" in data and data["usage"] is not None:
+                        usage = data["usage"]
+                        server_token_count = usage.get("completion_tokens")
+                        # OpenAI API는 duration을 제공하지 않으므로 client time 활용하여 근사치 계산
+                        if server_token_count and first_token_time:
+                            server_tps = server_token_count / (time.perf_counter() - first_token_time)
                                 
                     if token_count >= MAX_TOKENS:
                         if progress_placeholder:
@@ -99,13 +125,17 @@ def benchmark_model(model_info, target_ip="localhost", prompt_text="", progress_
         
         ttft = first_token_time - start_time if first_token_time else 0
         total_time = end_time - first_token_time if first_token_time else 0
-        tps = token_count / total_time if total_time > 0 else 0
+        client_tps = token_count / total_time if total_time > 0 else 0
         
         return {
             "success": True,
             "response": full_response,
             "ttft": ttft,
-            "tps": tps
+            "tps": client_tps,
+            "server_tps": server_tps if server_tps else client_tps,
+            "prompt_tps": prompt_tps,
+            "load_time": load_time,
+            "server_token_count": server_token_count if server_token_count else token_count
         }
         
     except Exception as e:

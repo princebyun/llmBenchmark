@@ -27,11 +27,23 @@ def render():
         st.markdown("---")
         st.subheader("📈 모델별 평균 성능(TPS) 비교")
         
-        avg_tps = df_history.groupby("모델명")["TPS"].mean().reset_index()
-        avg_tps = avg_tps.sort_values(by="TPS", ascending=True)
+        # 과거 데이터 하위 호환성 (TPS 컬럼명을 클라이언트 TPS로 처리)
+        if "클라이언트 TPS" not in df_history.columns and "TPS" in df_history.columns:
+            df_history["클라이언트 TPS"] = df_history["TPS"]
+            
+        # 차트에는 더 정확한 '서버 TPS'를 우선 사용하되, 없으면 '클라이언트 TPS' 사용
+        if "서버 TPS" in df_history.columns:
+            target_col = "서버 TPS"
+            # 구버전 데이터의 NaN 채우기
+            df_history["서버 TPS"] = df_history["서버 TPS"].fillna(df_history.get("클라이언트 TPS", df_history.get("TPS")))
+        else:
+            target_col = "클라이언트 TPS" if "클라이언트 TPS" in df_history.columns else "TPS"
+            
+        avg_tps = df_history.groupby("모델명")[target_col].mean().reset_index()
+        avg_tps = avg_tps.sort_values(by=target_col, ascending=True)
         
         fig = go.Figure(go.Bar(
-            x=avg_tps["TPS"],
+            x=avg_tps[target_col],
             y=avg_tps["모델명"],
             orientation='h',
             marker=dict(color='#1f77b4')

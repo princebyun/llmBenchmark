@@ -77,8 +77,11 @@ def render():
                         
                         results_summary.append({
                             "모델명": selected_model_info["name"],
+                            "모델 로딩 (s)": round(result.get("load_time", 0) or 0, 2),
+                            "프롬프트 TPS": round(result.get("prompt_tps", 0) or 0, 1),
                             "TTFT (s)": round(result["ttft"], 2),
-                            "측정 TPS": round(result["tps"], 1),
+                            "서버 자체 TPS": round(result.get("server_tps", result["tps"]) or 0, 1),
+                            "클라이언트 TPS": round(result["tps"], 1),
                             "달성률 (%)": round((result["tps"] / target_tps * 100) if target_tps > 0 else 0, 1),
                             "최소 요구 VRAM": f"{expected_vram:.1f} GB" if expected_vram > 0 else "알 수 없음"
                         })

@@ -36,11 +36,11 @@ def get_ollama_models(target_ip="localhost"):
         pass
     return models
 
-def get_lmstudio_models(target_ip="localhost"):
-    """LM Studio 서버에서 모델 목록을 가져옵니다."""
+def get_openai_compatible_models(target_ip="localhost", port=1234, source_name="LM Studio"):
+    """OpenAI 호환 API(vLLM, oMLX, LM Studio 등) 서버에서 모델 목록을 가져옵니다."""
     models = []
     try:
-        response = requests.get(f"http://{target_ip}:1234/v1/models", timeout=2)
+        response = requests.get(f"http://{target_ip}:{port}/v1/models", timeout=2)
         if response.status_code == 200:
             data = response.json()
             for model in data.get("data", []):
@@ -48,12 +48,20 @@ def get_lmstudio_models(target_ip="localhost"):
                 params = extract_params_from_name(name)
                 models.append({
                     "name": name, 
-                    "source": "LM Studio",
-                    "params": params
+                    "source": source_name,
+                    "params": params,
+                    "port": port
                 })
     except requests.exceptions.RequestException:
         pass
     return models
 
 def get_all_models(target_ip="localhost"):
-    return get_ollama_models(target_ip) + get_lmstudio_models(target_ip)
+    models = get_ollama_models(target_ip)
+    # 각 모델 소스별로 포트 저장
+    for m in models:
+        m["port"] = 11434
+        
+    models += get_openai_compatible_models(target_ip, port=1234, source_name="LM Studio")
+    models += get_openai_compatible_models(target_ip, port=8000, source_name="vLLM / oMLX")
+    return models
