@@ -71,12 +71,9 @@ def render():
             default=[list(model_options.keys())[0]] if model_options else []
         )
         
-        prompt_category = st.selectbox("벤치마크 프롬프트 유형", list(PROMPT_TEMPLATES.keys()) + ["✏️ 직접 입력"])
-        if prompt_category == "✏️ 직접 입력":
-            prompt_text = st.text_area("벤치마크에 사용할 프롬프트를 직접 입력하세요:", height=100)
-        else:
-            prompt_text = PROMPT_TEMPLATES[prompt_category]
-            st.info(f"**프롬프트 내용:**\n{prompt_text}")
+        prompt_category = st.selectbox("벤치마크 프롬프트 유형", list(PROMPT_TEMPLATES.keys()))
+        prompt_text = PROMPT_TEMPLATES[prompt_category]
+        st.info(f"**프롬프트 내용:**\n{prompt_text}")
         
         if st.button("벤치마크 일괄 시작", type="primary"):
             if not prompt_text.strip():
