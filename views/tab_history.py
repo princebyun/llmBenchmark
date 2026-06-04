@@ -29,7 +29,7 @@ def render():
         
         st.dataframe(
             df_history,
-            width='stretch',
+            use_container_width=True,
             hide_index=True
         )
         
@@ -57,7 +57,7 @@ def render():
             yaxis_title="모델",
             height=max(300, len(avg_tps) * 50)
         )
-        st.plotly_chart(fig, width='stretch')
+        st.plotly_chart(fig, use_container_width=True)
         
         if st.button("🗑️ 모든 이력 지우기", type="secondary"):
             from services.history import clear_benchmark_history

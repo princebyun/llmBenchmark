@@ -192,14 +192,14 @@ def render():
                     st.subheader("📊 일괄 벤치마크 요약 결과")
                     
                     display_df = pd.DataFrame([{k: v for k, v in r.items() if k != "턴별 결과"} for r in results_summary])
-                    st.dataframe(display_df, width='stretch', hide_index=True)
+                    st.dataframe(display_df, use_container_width=True, hide_index=True)
                     
                     for r in results_summary:
                         if is_multiturn and "턴별 결과" in r:
                             st.markdown(f"#### 🔄 {r['모델명']} 멀티턴 상세 분석")
                             colA, colB = st.columns([1, 1])
                             with colA:
-                                st.dataframe(pd.DataFrame(r["턴별 결과"])[["턴", "TTFT", "클라이언트 TPS", "토큰 수"]], width='stretch', hide_index=True)
+                                st.dataframe(pd.DataFrame(r["턴별 결과"])[["턴", "TTFT", "클라이언트 TPS", "토큰 수"]], use_container_width=True, hide_index=True)
                             with colB:
                                 fig = draw_multiturn_line_chart(r["턴별 결과"])
                                 st.plotly_chart(fig, use_container_width=True)
