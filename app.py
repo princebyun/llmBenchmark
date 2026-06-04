@@ -22,7 +22,7 @@ st.markdown("""
 # 2. 메인 UI 및 탭 라우팅
 # ==========================================
 st.title("🚀 로컬 LLM 하드웨어 벤치마크 및 진단")
-st.markdown("Ollama 및 LM Studio에 설치된 모델을 감지하고 내 PC의 성능(TPS)을 글로벌 기준과 비교합니다.")
+st.markdown("Ollama, LM Studio, vLLM, oMLX 등에 설치된 모델을 감지하고 내 PC의 성능(TPS)을 글로벌 기준과 비교합니다.")
 
 tab1, tab2, tab3 = st.tabs(["🚀 내 하드웨어 진단", "🏆 글로벌 리더보드", "📊 벤치마크 이력"])
 

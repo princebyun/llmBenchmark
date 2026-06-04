@@ -10,7 +10,7 @@ def render():
     st.subheader("진단 환경 설정")
     
     target_ip = st.text_input("🎯 벤치마크할 기기의 IP 주소", value="localhost")
-    st.caption("외부 기기를 벤치마크하려면 해당 기기의 IP(예: 192.168.0.x)를 입력하세요. (단, 해당 기기의 Ollama/LM Studio 외부 접속이 허용되어 있어야 합니다.)")
+    st.caption("외부 기기를 벤치마크하려면 해당 기기의 IP(예: 192.168.0.x)를 입력하세요. (단, 해당 기기의 LLM 프로그램(Ollama, LM Studio, vLLM, oMLX 등) 외부 접속이 허용되어 있어야 합니다.)")
     
     with st.expander("💡 외부 기기 접속 허용 설정 방법 보기"):
         st.markdown("""
@@ -21,18 +21,6 @@ def render():
         **LM Studio의 경우:**
         - Local Server 탭 설정에서 `Cross-Origin-Resource-Sharing (CORS)` 활성화
         - 외부 IP가 접근할 수 있도록 포트(1234) 방화벽 해제
-        """)
-        
-    with st.expander("💡 벤치마크 실패(타임아웃 등 에러) 시 대처 방법 보기"):
-        st.markdown("""
-        **1. 'Read timed out' (대기 시간 초과) 에러가 발생한 경우:**
-        - **원인:** 서버가 종료된 것이 아니라, 하드디스크에서 무거운 모델을 VRAM으로 불러오느라(Loading) 아직 응답을 주지 못한 상태입니다.
-        - **대처법 (재시도):** 약 10~20초 정도 기다렸다가 다시 '벤치마크 시작' 버튼을 눌러보세요. 이미 로딩이 끝나서 두 번째부터는 정상 측정될 확률이 높습니다.
-        - **대처법 (모델 변경):** 여러 번 재시도해도 동일하다면 해당 기기 사양에 비해 모델이 너무 무거운 것이니, 더 작은 파라미터의 모델로 변경하세요.
-        
-        **2. 아예 모델을 찾을 수 없거나 연결 거부(Connection Refused)인 경우:**
-        - 백그라운드에서 Ollama, LM Studio, vLLM 등의 서버가 제대로 켜져 있는지 확인하세요.
-        - 외부 기기를 측정 중이라면 위의 '외부 기기 접속 허용 설정'을 참고하여 방화벽/접근 권한을 개방해야 합니다.
         """)
     
     available_models = get_all_models(target_ip)
@@ -99,6 +87,18 @@ def render():
                         })
                     else:
                         st.error(f"🚨 **{selected_model_info['name']} 벤치마크 실패!** 통신 중 오류 발생: `{result['error']}`")
+                        
+                        with st.expander("💡 벤치마크 실패(타임아웃 등 에러) 시 대처 방법 보기"):
+                            st.markdown("""
+                            **1. 'Read timed out' (대기 시간 초과) 에러가 발생한 경우:**
+                            - **원인:** 서버가 멈춘 것이 아니라, 하드디스크에서 무거운 모델을 VRAM으로 불러오느라(Loading) 응답이 늦어지는 상태입니다.
+                            - **대처법 (재시도):** 약 10~20초 정도 기다렸다가 다시 '벤치마크 시작' 버튼을 눌러보세요. 이미 로딩이 끝나서 두 번째부터는 정상 측정될 확률이 높습니다.
+                            - **대처법 (모델 변경):** 여러 번 재시도해도 동일하다면 기기 사양에 비해 모델이 너무 무거운 것이니, 더 작은 파라미터의 모델로 변경하세요.
+                            
+                            **2. 연결 거부(Connection Refused) 에러인 경우:**
+                            - 백그라운드에서 LLM 프로그램(Ollama, LM Studio, vLLM, oMLX 등) 서버가 켜져 있는지 확인하세요.
+                            - 외부 기기를 측정 중이라면 상단의 '외부 기기 접속 허용 설정'을 참고하여 개방해야 합니다.
+                            """)
                         
                     progress_bar.progress((i + 1) / len(selected_options))
                 
