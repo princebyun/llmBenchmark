@@ -15,6 +15,7 @@ st.set_page_config(
 st.markdown("""
     <style>
         .stDeployButton {display:none;}
+        [data-testid="stAppDeployButton"] {display:none !important;}
         .block-container {
             max-width: 900px !important;
         }
