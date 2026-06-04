@@ -6,9 +6,6 @@ import time
 import json
 import re
 import os
-import platform
-import psutil
-import subprocess
 from datetime import datetime
 
 HISTORY_FILE = "benchmark_history.json"
@@ -16,46 +13,13 @@ HISTORY_FILE = "benchmark_history.json"
 # ==========================================
 # 1. 페이지 설정 및 초기화
 # ==========================================
-@st.cache_data(ttl=3600)
-def get_system_specs():
-    specs = {
-        "os": platform.system() + " " + platform.release(),
-        "cpu": platform.processor() or "알 수 없음",
-        "ram": f"{psutil.virtual_memory().total / (1024**3):.1f} GB",
-        "gpu": "알 수 없음",
-        "vram": "알 수 없음"
-    }
-    try:
-        gpu_output = subprocess.check_output(
-            ['nvidia-smi', '--query-gpu=name,memory.total', '--format=csv,noheader,nounits'], 
-            encoding='utf-8', 
-            timeout=2
-        ).strip().split('\n')[0]
-        parts = gpu_output.split(', ')
-        if len(parts) == 2:
-            specs["gpu"] = parts[0]
-            specs["vram"] = f"{int(parts[1]) / 1024:.1f} GB"
-    except Exception:
-        pass
-    return specs
 
 st.set_page_config(
     page_title="로컬 LLM 하드웨어 벤치마크",
     page_icon="🚀",
     layout="wide",
-    initial_sidebar_state="expanded"
+    initial_sidebar_state="collapsed"
 )
-
-with st.sidebar:
-    st.header("💻 서버 시스템 정보")
-    st.caption("이 정보는 웹 서버가 실행 중인 호스트 PC의 하드웨어 스펙입니다. (원격 기기를 테스트하는 경우, 스펙은 동일하게 서버를 기준으로 표기됩니다.)")
-    specs = get_system_specs()
-    st.text(f"🖥️ OS: {specs['os']}")
-    st.text(f"⚙️ CPU: {specs['cpu']}")
-    st.text(f"💾 RAM: {specs['ram']}")
-    st.text(f"🎮 GPU: {specs['gpu']}")
-    st.text(f"📹 VRAM: {specs['vram']}")
-    st.markdown("---")
 
 # 불필요한 기본 UI 요소(Deploy 버튼 등) 숨기기
 st.markdown("""
