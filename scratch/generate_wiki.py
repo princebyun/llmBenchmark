@@ -79,13 +79,25 @@ def render():
     st.divider()
     
     # ---------------------------------------------------------
+    # 검색 기능
+    # ---------------------------------------------------------
+    search_query = st.text_input("🔍 모델명 검색 (예: Llama, Qwen)", placeholder="검색어를 입력하세요...")
+    all_models = list(MODEL_WIKI_DATA.keys())
+    if search_query:
+        models_list = [m for m in all_models if search_query.lower() in m.lower()]
+    else:
+        models_list = all_models
+        
+    # ---------------------------------------------------------
     # 페이지네이션(Pagination) 로직
     # ---------------------------------------------------------
     ITEMS_PER_PAGE = 10
-    models_list = list(MODEL_WIKI_DATA.keys())
-    total_pages = (len(models_list) + ITEMS_PER_PAGE - 1) // ITEMS_PER_PAGE
+    total_pages = max(1, (len(models_list) + ITEMS_PER_PAGE - 1) // ITEMS_PER_PAGE)
     
     if 'wiki_page' not in st.session_state:
+        st.session_state['wiki_page'] = 1
+        
+    if st.session_state['wiki_page'] > total_pages:
         st.session_state['wiki_page'] = 1
         
     col1, col2, col3 = st.columns([1, 2, 1])
