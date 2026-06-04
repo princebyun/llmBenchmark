@@ -1,5 +1,5 @@
 import streamlit as st
-from pages import tab_benchmark, tab_leaderboard, tab_history
+from views import tab_benchmark, tab_leaderboard, tab_history
 
 # ==========================================
 # 1. 페이지 설정 및 초기화
