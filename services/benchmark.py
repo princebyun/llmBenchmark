@@ -2,6 +2,9 @@ import time
 import json
 import requests
 
+MAX_TOKENS = 1000  # 비정상적으로 긴 출력을 방지하기 위한 최대 토큰 수 제한
+MAX_TIME_SECONDS = 120  # 최대 테스트 시간 (초) - 무한 대기 방지
+
 def get_baseline_tps(model_info):
     """모델의 실제 파라미터 수를 기반으로 동적 기준 TPS를 계산합니다."""
     params = model_info.get("params", 0)
@@ -27,10 +30,15 @@ def benchmark_model(model_info, target_ip="localhost", prompt_text="", progress_
                 "messages": [{"role": "user", "content": prompt_text}],
                 "stream": True
             }
-            response = requests.post(url, json=payload, stream=True)
+            response = requests.post(url, json=payload, stream=True, timeout=30)
             response.raise_for_status()
             
             for line in response.iter_lines():
+                if time.perf_counter() - start_time > MAX_TIME_SECONDS:
+                    if progress_placeholder:
+                        progress_placeholder.warning("⚠️ 최대 테스트 시간 초과로 측정을 강제 종료했습니다.")
+                    break
+                    
                 if line:
                     if first_token_time is None:
                         first_token_time = time.perf_counter()
@@ -41,6 +49,14 @@ def benchmark_model(model_info, target_ip="localhost", prompt_text="", progress_
                         token_count += 1 
                         if progress_placeholder:
                             progress_placeholder.info(f"⏳ **벤치마크 진행 중...** 현재 {token_count}개의 토큰을 처리했습니다.")
+                    
+                    if data.get("done", False):
+                        break
+                        
+                    if token_count >= MAX_TOKENS:
+                        if progress_placeholder:
+                            progress_placeholder.warning("⚠️ 최대 토큰 수 초과로 측정을 강제 종료했습니다.")
+                        break
                         
         elif source == "LM Studio":
             url = f"http://{target_ip}:1234/v1/chat/completions"
@@ -49,10 +65,15 @@ def benchmark_model(model_info, target_ip="localhost", prompt_text="", progress_
                 "messages": [{"role": "user", "content": prompt_text}],
                 "stream": True
             }
-            response = requests.post(url, json=payload, stream=True)
+            response = requests.post(url, json=payload, stream=True, timeout=30)
             response.raise_for_status()
             
             for line in response.iter_lines():
+                if time.perf_counter() - start_time > MAX_TIME_SECONDS:
+                    if progress_placeholder:
+                        progress_placeholder.warning("⚠️ 최대 테스트 시간 초과로 측정을 강제 종료했습니다.")
+                    break
+                    
                 line = line.decode('utf-8')
                 if line.startswith("data: "):
                     data_str = line[6:]
@@ -68,6 +89,11 @@ def benchmark_model(model_info, target_ip="localhost", prompt_text="", progress_
                             token_count += 1
                             if progress_placeholder:
                                 progress_placeholder.info(f"⏳ **벤치마크 진행 중...** 현재 {token_count}개의 토큰을 처리했습니다.")
+                                
+                    if token_count >= MAX_TOKENS:
+                        if progress_placeholder:
+                            progress_placeholder.warning("⚠️ 최대 토큰 수 초과로 측정을 강제 종료했습니다.")
+                        break
 
         end_time = time.perf_counter()
         
