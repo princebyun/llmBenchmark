@@ -65,10 +65,28 @@ def render():
             display_name = f"[{m['source']}] {m['name']} (Params: {param_text})"
             model_options[display_name] = m
             
+        st.markdown("""
+        <style>
+        /* 드롭다운 옵션 텍스트 줄바꿈/잘림 방지 */
+        div[role="listbox"] li {
+            white-space: normal !important;
+            word-wrap: break-word !important;
+        }
+        /* 선택된 칩(태그) 텍스트 잘림 방지 */
+        span[data-baseweb="tag"] span {
+            white-space: normal !important;
+            overflow: visible !important;
+            text-overflow: clip !important;
+            max-width: none !important;
+        }
+        </style>
+        """, unsafe_allow_html=True)
+        
         selected_options = st.multiselect(
-            "진단할 모델을 선택하세요 (여러 개 선택 시 순차적으로 자동 벤치마크합니다):", 
+            "진단할 모델 (여러 개 선택 시 순차적으로 자동 벤치마크합니다):", 
             options=list(model_options.keys()),
-            default=list(model_options.keys()) if model_options else []
+            default=[],
+            placeholder="진단할 모델을 선택하세요"
         )
         
         prompt_category = st.selectbox("벤치마크 프롬프트 유형", list(PROMPT_TEMPLATES.keys()))
