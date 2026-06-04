@@ -1,8 +1,6 @@
 import streamlit as st
 import pandas as pd
 import plotly.graph_objects as go
-import os
-from config import HISTORY_FILE
 from services.history import load_benchmark_history
 
 def render():
@@ -57,6 +55,6 @@ def render():
         st.plotly_chart(fig, width='stretch')
         
         if st.button("🗑️ 모든 이력 지우기", type="secondary"):
-            if os.path.exists(HISTORY_FILE):
-                os.remove(HISTORY_FILE)
-            st.success("모든 벤치마크 이력이 삭제되었습니다. (새로고침 시 반영됩니다)")
+            from services.history import clear_benchmark_history
+            clear_benchmark_history()
+            st.success("모든 벤치마크 이력이 삭제되었습니다. (새로고침 시 빈 화면이 표시됩니다)")

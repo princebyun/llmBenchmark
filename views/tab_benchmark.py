@@ -68,12 +68,11 @@ def render():
         selected_options = st.multiselect(
             "진단할 모델을 선택하세요 (여러 개 선택 시 순차적으로 자동 벤치마크합니다):", 
             options=list(model_options.keys()),
-            default=[list(model_options.keys())[0]] if model_options else []
+            default=list(model_options.keys()) if model_options else []
         )
         
         prompt_category = st.selectbox("벤치마크 프롬프트 유형", list(PROMPT_TEMPLATES.keys()))
         prompt_text = PROMPT_TEMPLATES[prompt_category]
-        st.info(f"**프롬프트 내용:**\n{prompt_text}")
         
         if st.button("벤치마크 일괄 시작", type="primary"):
             if not prompt_text.strip():
@@ -143,7 +142,18 @@ def render():
                     df_summary = pd.DataFrame(results_summary)
                     st.dataframe(df_summary, width='stretch', hide_index=True)
                     
+                    with st.expander("💡 벤치마크 지표 용어 설명 (클릭하여 닫기/열기)", expanded=True):
+                        st.markdown("""
+                        * **모델 로딩 (s)**: 인공지능 뇌(모델)를 메모리에 불러오는 데 걸린 시간입니다. **(낮을수록 좋음 ⬇️)**
+                        * **프롬프트 TPS**: 질문(프롬프트)을 인공지능이 얼마나 빨리 읽고 이해하는지 나타내는 처리 속도입니다. **(높을수록 좋음 ⬆️)**
+                        * **TTFT (s)**: Time To First Token. 질문을 던지고 첫 번째 대답 글자가 화면에 찍히기까지 걸린 대기 시간입니다. **(낮을수록 좋음 ⬇️)**
+                        * **서버 자체 TPS**: 모델이 순수하게 답변 글자를 만들어내는 초당 생성 속도입니다. **(높을수록 좋음 ⬆️)**
+                        * **클라이언트 TPS**: 네트워크 통신 시간까지 포함하여, 실제 사용자 화면에 글자가 찍히는 '체감' 초당 생성 속도입니다. **(높을수록 좋음 ⬆️)**
+                        * **달성률 (%)**: 이 모델이 낼 수 있는 최고 속도 대비 현재 내 컴퓨터 환경에서 끌어내고 있는 속도의 비율입니다. 100%에 가까울수록 하드웨어 성능을 알차게 쓰고 있다는 뜻입니다. **(높을수록 좋음 ⬆️)**
+                        * **최소 요구 VRAM**: 이 모델을 버벅거림 없이 쾌적하게 돌리기 위해 필요한 그래픽카드 메모리의 최소 용량입니다.
+                        """)
+                    
                     if len(results_summary) == 1:
                         st.subheader("성능 달성률 진단")
-                        fig = draw_gauge_chart(results_summary[0]["측정 TPS"], get_baseline_tps(model_options[selected_options[0]]))
+                        fig = draw_gauge_chart(results_summary[0]["클라이언트 TPS"], get_baseline_tps(model_options[selected_options[0]]))
                         st.plotly_chart(fig, width='stretch')
