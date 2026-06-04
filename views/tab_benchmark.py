@@ -84,6 +84,7 @@ def render():
                 progress_bar = st.progress(0)
                 status_text = st.empty()
                 results_summary = []
+                has_error = False
                 
                 for i, option in enumerate(selected_options):
                     selected_model_info = model_options[option]
@@ -115,6 +116,7 @@ def render():
                         })
                     else:
                         st.error(f"🚨 **{selected_model_info['name']} 벤치마크 실패!** 통신 중 오류 발생: `{result['error']}`")
+                        has_error = True
                         
                         with st.expander("💡 벤치마크 실패(타임아웃 등 에러) 시 대처 방법 보기"):
                             st.markdown("""
@@ -130,7 +132,10 @@ def render():
                         
                     progress_bar.progress((i + 1) / len(selected_options))
                 
-                status_text.success("🎉 모든 벤치마크가 성공적으로 완료되었습니다! 전체 이력은 '벤치마크 이력' 탭에서 확인하실 수 있습니다.")
+                if has_error:
+                    status_text.warning("⚠️ 일부 벤치마크 과정에서 오류가 발생했습니다. 아래 메시지를 확인해 주세요.")
+                else:
+                    status_text.success("🎉 모든 벤치마크가 성공적으로 완료되었습니다! 전체 이력은 '벤치마크 이력' 탭에서 확인하실 수 있습니다.")
                 
                 if results_summary:
                     st.markdown("---")
