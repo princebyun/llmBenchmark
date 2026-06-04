@@ -5,6 +5,10 @@ import plotly.graph_objects as go
 import time
 import json
 import re
+import os
+from datetime import datetime
+
+HISTORY_FILE = "benchmark_history.json"
 
 # ==========================================
 # 1. 페이지 설정 및 초기화
@@ -23,8 +27,12 @@ st.markdown("""
     </style>
 """, unsafe_allow_html=True)
 
-# 벤치마크용 고정 프롬프트
-BENCHMARK_PROMPT = "양자 역학의 불확정성 원리를 고등학생이 이해할 수 있도록 3문단으로 요약하고, 일상생활의 예시를 하나 들어 설명해 줘."
+# 기본 제공 프롬프트 템플릿
+PROMPT_TEMPLATES = {
+    "📝 일반 설명 (기본)": "양자 역학의 불확정성 원리를 고등학생이 이해할 수 있도록 3문단으로 요약하고, 일상생활의 예시를 하나 들어 설명해 줘.",
+    "💻 코드 작성 (파이썬)": "파이썬으로 A* 경로 탐색 알고리즘을 구현하고, 주석을 상세히 달아줘. 그리고 간단한 2D 미로 예제도 함께 만들어줘.",
+    "🌐 번역 (한→영)": "다음 한국어 기사를 자연스러운 비즈니스 영어로 번역해 줘: '최근 인공지능 기술의 발전은 기업들의 업무 효율성을 극대화하고 있습니다. 특히 로컬 LLM 환경은 데이터 보안 측면에서 큰 강점을 가집니다.'"
+}
 
 # ==========================================
 # 2. 리더보드 실제 데이터 연동 (Hugging Face API)
@@ -138,7 +146,45 @@ def get_all_models(target_ip="localhost"):
     return get_ollama_models(target_ip) + get_lmstudio_models(target_ip)
 
 # ==========================================
-# 4. 벤치마크 및 통신 로직
+# 4. 벤치마크 이력 관리 로직
+# ==========================================
+def save_benchmark_history(model_info, prompt_category, result, target_tps):
+    """벤치마크 결과를 로컬 JSON 파일에 저장합니다."""
+    history = []
+    if os.path.exists(HISTORY_FILE):
+        try:
+            with open(HISTORY_FILE, "r", encoding="utf-8") as f:
+                history = json.load(f)
+        except:
+            pass
+            
+    history.append({
+        "측정 일시": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
+        "모델명": model_info["name"],
+        "플랫폼": model_info["source"],
+        "파라미터 (B)": model_info["params"],
+        "프롬프트 유형": prompt_category,
+        "TTFT (s)": round(result["ttft"], 2),
+        "TPS": round(result["tps"], 1),
+        "기준 TPS": round(target_tps, 1),
+        "달성률 (%)": round((result["tps"] / target_tps * 100) if target_tps > 0 else 0, 1)
+    })
+    
+    with open(HISTORY_FILE, "w", encoding="utf-8") as f:
+        json.dump(history, f, ensure_ascii=False, indent=2)
+
+def load_benchmark_history():
+    """저장된 벤치마크 이력을 불러옵니다."""
+    if os.path.exists(HISTORY_FILE):
+        try:
+            with open(HISTORY_FILE, "r", encoding="utf-8") as f:
+                return json.load(f)
+        except:
+            pass
+    return []
+
+# ==========================================
+# 5. 벤치마크 및 통신 로직
 # ==========================================
 def get_baseline_tps(model_info):
     """모델의 실제 파라미터 수를 기반으로 동적 기준 TPS를 계산합니다."""
@@ -147,7 +193,7 @@ def get_baseline_tps(model_info):
         return 200.0 / params
     return 30.0 # 파라미터 수를 모를 경우 30 TPS를 기본값으로 사용
 
-def benchmark_model(model_info, target_ip="localhost", progress_placeholder=None):
+def benchmark_model(model_info, target_ip="localhost", prompt_text="", progress_placeholder=None):
     """선택된 모델에 벤치마크 프롬프트를 전송하고 성능을 측정합니다."""
     model_name = model_info["name"]
     source = model_info["source"]
@@ -162,7 +208,7 @@ def benchmark_model(model_info, target_ip="localhost", progress_placeholder=None
             url = f"http://{target_ip}:11434/api/chat"
             payload = {
                 "model": model_name,
-                "messages": [{"role": "user", "content": BENCHMARK_PROMPT}],
+                "messages": [{"role": "user", "content": prompt_text}],
                 "stream": True
             }
             response = requests.post(url, json=payload, stream=True)
@@ -184,7 +230,7 @@ def benchmark_model(model_info, target_ip="localhost", progress_placeholder=None
             url = f"http://{target_ip}:1234/v1/chat/completions"
             payload = {
                 "model": model_name,
-                "messages": [{"role": "user", "content": BENCHMARK_PROMPT}],
+                "messages": [{"role": "user", "content": prompt_text}],
                 "stream": True
             }
             response = requests.post(url, json=payload, stream=True)
@@ -264,7 +310,7 @@ def draw_gauge_chart(achieved_tps, target_tps):
 st.title("🚀 로컬 LLM 하드웨어 벤치마크 및 진단")
 st.markdown("Ollama 및 LM Studio에 설치된 모델을 감지하고 내 PC의 성능(TPS)을 글로벌 기준과 비교합니다.")
 
-tab1, tab2 = st.tabs(["🚀 내 하드웨어 진단", "🏆 글로벌 리더보드"])
+tab1, tab2, tab3 = st.tabs(["🚀 내 하드웨어 진단", "🏆 글로벌 리더보드", "📊 벤치마크 이력"])
 
 with tab1:
     st.subheader("진단 환경 설정")
@@ -299,10 +345,21 @@ with tab1:
         selected_option = st.selectbox("진단할 모델을 선택하세요:", list(model_options.keys()))
         selected_model_info = model_options[selected_option]
         
+        # 프롬프트 선택 UI
+        prompt_category = st.selectbox("벤치마크 프롬프트 유형", list(PROMPT_TEMPLATES.keys()) + ["✏️ 직접 입력"])
+        if prompt_category == "✏️ 직접 입력":
+            prompt_text = st.text_area("벤치마크에 사용할 프롬프트를 직접 입력하세요:", height=100)
+        else:
+            prompt_text = PROMPT_TEMPLATES[prompt_category]
+            st.info(f"**프롬프트 내용:**\n{prompt_text}")
+        
         if st.button("벤치마크 시작", type="primary"):
-            progress_placeholder = st.empty()
-            with st.spinner("벤치마크를 진행 중입니다. 잠시만 기다려주세요..."):
-                result = benchmark_model(selected_model_info, target_ip, progress_placeholder)
+            if not prompt_text.strip():
+                st.error("프롬프트를 입력해주세요.")
+            else:
+                progress_placeholder = st.empty()
+                with st.spinner("벤치마크를 진행 중입니다. 잠시만 기다려주세요..."):
+                    result = benchmark_model(selected_model_info, target_ip, prompt_text, progress_placeholder)
                 
             progress_placeholder.empty()
                 
@@ -316,6 +373,9 @@ with tab1:
                 
                 target_tps = get_baseline_tps(selected_model_info)
                 col3.metric("기준 TPS (Baseline)", f"{target_tps:.1f} tokens/s")
+                
+                # 벤치마크 이력 자동 저장
+                save_benchmark_history(selected_model_info, prompt_category, result, target_tps)
                 
                 # 하드웨어 측정값 (요구 VRAM) 표시
                 params = selected_model_info.get("params", 0)
@@ -337,6 +397,7 @@ with tab2:
     st.markdown("현재 Hugging Face 데이터셋 서버에서 가져온 상위 100개 모델의 원본 데이터입니다. 필터를 이용해 원하는 카테고리와 양자화 수준별 추정 VRAM/TPS를 확인하세요.")
     
     # 필터 UI
+    search_query = st.text_input("🔍 모델명 검색 (예: llama, qwen, phi)", placeholder="검색어를 입력하세요...")
     filter_col1, filter_col2 = st.columns(2)
     with filter_col1:
         category = st.selectbox("모델 크기 카테고리", ["전체 보기", "소형 모델 (< 8B)", "중형 모델 (8B ~ 20B)", "대형 모델 (> 20B)"])
@@ -349,7 +410,12 @@ with tab2:
     if raw_data:
         filtered_data = []
         for row in raw_data:
+            model_name_str = row["모델명"]
             params = row["파라미터 수 (B)"]
+            
+            # 검색어 필터링
+            if search_query and search_query.lower() not in model_name_str.lower():
+                continue
             
             # 카테고리 필터링
             if category == "소형 모델 (< 8B)" and params >= 8: continue
@@ -389,3 +455,50 @@ with tab2:
         )
     else:
         st.warning("리더보드 데이터를 가져오지 못했습니다.")
+
+with tab3:
+    st.subheader("📊 벤치마크 이력 및 비교")
+    st.markdown("과거에 진행했던 벤치마크 결과들이 자동으로 저장되어 표시됩니다. 모델 간 성능을 비교하거나 하드웨어 변경에 따른 성능 변화를 추적하세요.")
+    
+    history_data = load_benchmark_history()
+    
+    if not history_data:
+        st.info("아직 저장된 벤치마크 이력이 없습니다. '내 하드웨어 진단' 탭에서 벤치마크를 한 번 실행해 보세요!")
+    else:
+        df_history = pd.DataFrame(history_data)
+        
+        # 최신 순으로 정렬
+        df_history = df_history.sort_values(by="측정 일시", ascending=False)
+        
+        st.dataframe(
+            df_history,
+            width='stretch',
+            hide_index=True
+        )
+        
+        st.markdown("---")
+        st.subheader("📈 모델별 평균 성능(TPS) 비교")
+        
+        # 모델별 평균 TPS 계산하여 막대 차트로 시각화
+        avg_tps = df_history.groupby("모델명")["TPS"].mean().reset_index()
+        avg_tps = avg_tps.sort_values(by="TPS", ascending=True)
+        
+        fig = go.Figure(go.Bar(
+            x=avg_tps["TPS"],
+            y=avg_tps["모델명"],
+            orientation='h',
+            marker=dict(color='#1f77b4')
+        ))
+        fig.update_layout(
+            title="모델별 평균 TPS (초당 토큰 처리량)",
+            xaxis_title="TPS",
+            yaxis_title="모델",
+            height=max(300, len(avg_tps) * 50)
+        )
+        st.plotly_chart(fig, width='stretch')
+        
+        # 기록 삭제 버튼
+        if st.button("🗑️ 모든 이력 지우기", type="secondary"):
+            if os.path.exists(HISTORY_FILE):
+                os.remove(HISTORY_FILE)
+            st.success("모든 벤치마크 이력이 삭제되었습니다. (새로고침 시 반영됩니다)")
