@@ -5,7 +5,7 @@ from services.models import get_all_models
 from services.benchmark import benchmark_model, get_baseline_tps
 from services.history import save_benchmark_history
 from charts import draw_gauge_chart
-
+import streamlit.components.v1 as components
 def show_custom_spinner(text):
     return f"""
     <style>
@@ -143,6 +143,29 @@ def render():
             default=[],
             placeholder="진단할 모델을 선택하세요"
         )
+        
+        components.html("""
+        <script>
+        const doc = window.parent.document;
+        const observer = new MutationObserver(() => {
+            const listbox = doc.querySelector('div[role="listbox"]');
+            if (listbox) {
+                const options = listbox.querySelectorAll('li[role="option"]');
+                options.forEach(option => {
+                    if (!option.dataset.listenerAttached) {
+                        option.dataset.listenerAttached = 'true';
+                        option.addEventListener('click', () => {
+                            setTimeout(() => {
+                                doc.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape', bubbles: true, composed: true }));
+                            }, 50);
+                        });
+                    }
+                });
+            }
+        });
+        observer.observe(doc.body, { childList: true, subtree: true });
+        </script>
+        """, height=0)
         
         prompt_category = st.selectbox("벤치마크 프롬프트 유형", list(PROMPT_TEMPLATES.keys()))
         prompt_text = PROMPT_TEMPLATES[prompt_category]
