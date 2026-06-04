@@ -12,13 +12,13 @@ def render():
     if "target_ip" not in st.session_state:
         st.session_state.target_ip = ""
         
-    col1, col2 = st.columns([4, 1])
+    col1, col2 = st.columns([5, 1])
     with col1:
         target_ip_input = st.text_input("🎯 벤치마크할 기기의 IP 주소", value=st.session_state.target_ip)
     with col2:
-        st.write("") 
-        st.write("") 
-        if st.button("적용 및 새로고침", use_container_width=True):
+        # 텍스트 입력창 높이와 맞추기 위한 CSS 마진
+        st.markdown("<div style='margin-top: 28px;'></div>", unsafe_allow_html=True)
+        if st.button("적용", use_container_width=True):
             st.session_state.target_ip = target_ip_input
             if "available_models" in st.session_state:
                 del st.session_state["available_models"]

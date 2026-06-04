@@ -11,10 +11,13 @@ st.set_page_config(
     initial_sidebar_state="collapsed"
 )
 
-# 불필요한 기본 UI 요소(Deploy 버튼 등) 숨기기
+# 불필요한 기본 UI 요소 숨기기 및 반응형 최대 너비(900px) 설정
 st.markdown("""
     <style>
         .stDeployButton {display:none;}
+        .block-container {
+            max-width: 900px !important;
+        }
     </style>
 """, unsafe_allow_html=True)
 
