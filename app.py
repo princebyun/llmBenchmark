@@ -6,6 +6,9 @@ import time
 import json
 import re
 import os
+import platform
+import psutil
+import subprocess
 from datetime import datetime
 
 HISTORY_FILE = "benchmark_history.json"
@@ -13,12 +16,46 @@ HISTORY_FILE = "benchmark_history.json"
 # ==========================================
 # 1. 페이지 설정 및 초기화
 # ==========================================
+@st.cache_data(ttl=3600)
+def get_system_specs():
+    specs = {
+        "os": platform.system() + " " + platform.release(),
+        "cpu": platform.processor() or "알 수 없음",
+        "ram": f"{psutil.virtual_memory().total / (1024**3):.1f} GB",
+        "gpu": "알 수 없음",
+        "vram": "알 수 없음"
+    }
+    try:
+        gpu_output = subprocess.check_output(
+            ['nvidia-smi', '--query-gpu=name,memory.total', '--format=csv,noheader,nounits'], 
+            encoding='utf-8', 
+            timeout=2
+        ).strip().split('\n')[0]
+        parts = gpu_output.split(', ')
+        if len(parts) == 2:
+            specs["gpu"] = parts[0]
+            specs["vram"] = f"{int(parts[1]) / 1024:.1f} GB"
+    except Exception:
+        pass
+    return specs
+
 st.set_page_config(
     page_title="로컬 LLM 하드웨어 벤치마크",
     page_icon="🚀",
     layout="wide",
     initial_sidebar_state="expanded"
 )
+
+with st.sidebar:
+    st.header("💻 서버 시스템 정보")
+    st.caption("이 정보는 웹 서버가 실행 중인 호스트 PC의 하드웨어 스펙입니다. (원격 기기를 테스트하는 경우, 스펙은 동일하게 서버를 기준으로 표기됩니다.)")
+    specs = get_system_specs()
+    st.text(f"🖥️ OS: {specs['os']}")
+    st.text(f"⚙️ CPU: {specs['cpu']}")
+    st.text(f"💾 RAM: {specs['ram']}")
+    st.text(f"🎮 GPU: {specs['gpu']}")
+    st.text(f"📹 VRAM: {specs['vram']}")
+    st.markdown("---")
 
 # 불필요한 기본 UI 요소(Deploy 버튼 등) 숨기기
 st.markdown("""
@@ -342,8 +379,11 @@ with tab1:
             display_name = f"[{m['source']}] {m['name']} (Params: {param_text})"
             model_options[display_name] = m
             
-        selected_option = st.selectbox("진단할 모델을 선택하세요:", list(model_options.keys()))
-        selected_model_info = model_options[selected_option]
+        selected_options = st.multiselect(
+            "진단할 모델을 선택하세요 (여러 개 선택 시 순차적으로 자동 벤치마크합니다):", 
+            options=list(model_options.keys()),
+            default=[list(model_options.keys())[0]] if model_options else []
+        )
         
         # 프롬프트 선택 UI
         prompt_category = st.selectbox("벤치마크 프롬프트 유형", list(PROMPT_TEMPLATES.keys()) + ["✏️ 직접 입력"])
@@ -353,44 +393,59 @@ with tab1:
             prompt_text = PROMPT_TEMPLATES[prompt_category]
             st.info(f"**프롬프트 내용:**\n{prompt_text}")
         
-        if st.button("벤치마크 시작", type="primary"):
+        if st.button("벤치마크 일괄 시작", type="primary"):
             if not prompt_text.strip():
                 st.error("프롬프트를 입력해주세요.")
+            elif not selected_options:
+                st.warning("벤치마크할 모델을 하나 이상 선택해주세요.")
             else:
-                progress_placeholder = st.empty()
-                with st.spinner("벤치마크를 진행 중입니다. 잠시만 기다려주세요..."):
-                    result = benchmark_model(selected_model_info, target_ip, prompt_text, progress_placeholder)
+                progress_bar = st.progress(0)
+                status_text = st.empty()
+                results_summary = []
                 
-            progress_placeholder.empty()
+                for i, option in enumerate(selected_options):
+                    selected_model_info = model_options[option]
+                    status_text.info(f"[{i+1}/{len(selected_options)}] **{selected_model_info['name']}** 벤치마크 진행 중...")
+                    
+                    progress_placeholder = st.empty()
+                    with st.spinner(f"'{selected_model_info['name']}' 성능 측정 중... 잠시만 기다려주세요"):
+                        result = benchmark_model(selected_model_info, target_ip, prompt_text, progress_placeholder)
+                        
+                    progress_placeholder.empty()
+                    
+                    if result["success"]:
+                        target_tps = get_baseline_tps(selected_model_info)
+                        save_benchmark_history(selected_model_info, prompt_category, result, target_tps)
+                        st.success(f"✅ {selected_model_info['name']} 테스트 완료! (TPS: {result['tps']:.1f})")
+                        
+                        params = selected_model_info.get("params", 0)
+                        expected_vram = (params * 0.7) + 1.0 if params > 0 else 0
+                        
+                        results_summary.append({
+                            "모델명": selected_model_info["name"],
+                            "TTFT (s)": round(result["ttft"], 2),
+                            "측정 TPS": round(result["tps"], 1),
+                            "달성률 (%)": round((result["tps"] / target_tps * 100) if target_tps > 0 else 0, 1),
+                            "최소 요구 VRAM": f"{expected_vram:.1f} GB" if expected_vram > 0 else "알 수 없음"
+                        })
+                    else:
+                        st.error(f"🚨 **{selected_model_info['name']} 벤치마크 실패!** 통신 중 오류 발생: `{result['error']}`")
+                        
+                    progress_bar.progress((i + 1) / len(selected_options))
                 
-            if result["success"]:
-                st.success("벤치마크가 완료되었습니다!")
+                status_text.success("🎉 모든 벤치마크가 성공적으로 완료되었습니다! 전체 이력은 '벤치마크 이력' 탭에서 확인하실 수 있습니다.")
                 
-                # 결과 지표 표시
-                col1, col2, col3, col4 = st.columns(4)
-                col1.metric("TTFT (첫 응답 시간)", f"{result['ttft']:.2f} s")
-                col2.metric("측정된 TPS (초당 토큰)", f"{result['tps']:.1f} tokens/s")
-                
-                target_tps = get_baseline_tps(selected_model_info)
-                col3.metric("기준 TPS (Baseline)", f"{target_tps:.1f} tokens/s")
-                
-                # 벤치마크 이력 자동 저장
-                save_benchmark_history(selected_model_info, prompt_category, result, target_tps)
-                
-                # 하드웨어 측정값 (요구 VRAM) 표시
-                params = selected_model_info.get("params", 0)
-                expected_vram = (params * 0.7) + 1.0 if params > 0 else 0
-                vram_text = f"{expected_vram:.1f} GB" if expected_vram > 0 else "알 수 없음"
-                col4.metric("최소 요구 VRAM (4-bit)", vram_text)
-                
-                st.markdown("---")
-                
-                st.subheader("성능 달성률 진단")
-                fig = draw_gauge_chart(result['tps'], target_tps)
-                st.plotly_chart(fig, width='stretch')
-            else:
-                st.error(f"🚨 **벤치마크 실패!**\n\n모델 서버와의 통신 중 오류가 발생했습니다.\n\n**상세 오류:** `{result['error']}`")
-                st.toast("벤치마크에 실패했습니다. 서버 상태를 확인해주세요.", icon="🚨")
+                if results_summary:
+                    st.markdown("---")
+                    st.subheader("📊 일괄 벤치마크 요약 결과")
+                    df_summary = pd.DataFrame(results_summary)
+                    st.dataframe(df_summary, width='stretch', hide_index=True)
+                    
+                    # 1개만 돌렸을 경우 시각적 만족도를 위해 기존 게이지 차트도 같이 그려줌
+                    if len(results_summary) == 1:
+                        st.subheader("성능 달성률 진단")
+                        fig = draw_gauge_chart(results_summary[0]["측정 TPS"], get_baseline_tps(model_options[selected_options[0]]))
+                        st.plotly_chart(fig, width='stretch')
 
 with tab2:
     st.subheader("🏆 글로벌 리더보드 (Hugging Face Open LLM Leaderboard 실시간 데이터)")
