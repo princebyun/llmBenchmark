@@ -137,58 +137,38 @@ def render():
         </style>
         """, unsafe_allow_html=True)
         
-        selected_options = st.multiselect(
-            "진단할 모델 (여러 개 선택 시 순차적으로 자동 벤치마크합니다):", 
-            options=list(model_options.keys()),
-            default=[],
-            placeholder="진단할 모델을 선택하세요"
+        if "selected_models_list" not in st.session_state:
+            st.session_state.selected_models_list = []
+            
+        def on_model_select():
+            selected = st.session_state.get("temp_model_selector")
+            if selected and selected != "선택하세요":
+                if selected not in st.session_state.selected_models_list:
+                    st.session_state.selected_models_list.append(selected)
+
+        # 모델 선택 셀렉트박스 (선택 시 즉시 닫힘)
+        options = ["선택하세요"] + list(model_options.keys())
+        st.selectbox(
+            "진단할 모델 추가 (선택 시 아래 목록에 추가되며 창은 자동으로 닫힙니다):", 
+            options=options,
+            key="temp_model_selector",
+            on_change=on_model_select
         )
         
-        components.html("""
-        <script>
-        const doc = window.parent.document;
-        // 기존 observer가 있다면 정리 (중복 방지)
-        if (window.parent.myDropdownObserver) {
-            window.parent.myDropdownObserver.disconnect();
-        }
-        window.parent.myDropdownObserver = new MutationObserver(() => {
-            const listboxes = doc.querySelectorAll('[role="listbox"]');
-            listboxes.forEach(listbox => {
-                const options = listbox.querySelectorAll('[role="option"]');
-                options.forEach(option => {
-                    if (!option.dataset.autoCloseAttached) {
-                        option.dataset.autoCloseAttached = 'true';
-                        option.addEventListener('click', () => {
-                            // 사용자의 클릭 처리가 완료될 때까지 충분히 대기 (150ms)
-                            setTimeout(() => {
-                                // 화면 최상단 빈 공간에 마우스 클릭 이벤트를 발생시켜 강제로 창을 닫음
-                                const appElement = doc.querySelector('.stApp') || doc.body;
-                                const mousedownEvent = new MouseEvent('mousedown', {
-                                    bubbles: true, cancelable: true, view: window.parent, clientX: 1, clientY: 1
-                                });
-                                const mouseupEvent = new MouseEvent('mouseup', {
-                                    bubbles: true, cancelable: true, view: window.parent, clientX: 1, clientY: 1
-                                });
-                                const clickEvent = new MouseEvent('click', {
-                                    bubbles: true, cancelable: true, view: window.parent, clientX: 1, clientY: 1
-                                });
-                                appElement.dispatchEvent(mousedownEvent);
-                                appElement.dispatchEvent(mouseupEvent);
-                                appElement.dispatchEvent(clickEvent);
-                                
-                                // 추가적으로 포커스 해제도 시도
-                                if (doc.activeElement) {
-                                    doc.activeElement.blur();
-                                }
-                            }, 150);
-                        });
-                    }
-                });
-            });
-        });
-        window.parent.myDropdownObserver.observe(doc.body, { childList: true, subtree: true });
-        </script>
-        """, height=0)
+        # 선택된 모델 목록 표시 및 삭제 기능
+        selected_options = st.session_state.selected_models_list
+        if selected_options:
+            st.markdown("**✅ 벤치마크 진행 대기열:**")
+            for m in selected_options:
+                colA, colB = st.columns([10, 1])
+                with colA:
+                    st.info(m)
+                with colB:
+                    # 삭제 버튼 디자인 조정
+                    st.markdown("<div style='margin-top: 15px;'></div>", unsafe_allow_html=True)
+                    if st.button("❌", key=f"remove_{m}", help="이 모델을 대기열에서 제거합니다"):
+                        st.session_state.selected_models_list.remove(m)
+                        st.rerun()
         
         prompt_category = st.selectbox("벤치마크 프롬프트 유형", list(PROMPT_TEMPLATES.keys()))
         prompt_text = PROMPT_TEMPLATES[prompt_category]
