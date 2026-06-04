@@ -402,7 +402,7 @@ def render():
     st.divider()
     
     # ---------------------------------------------------------
-    # 3번안: 현재 페이지의 10개 모델 내용을 모두 세로로 렌더링
+    # 1번안: 현재 페이지의 10개 모델을 st.expander로 렌더링
     # ---------------------------------------------------------
     current_page = st.session_state['wiki_page']
     start_idx = (current_page - 1) * ITEMS_PER_PAGE
@@ -413,26 +413,21 @@ def render():
     for i, model_name in enumerate(page_models):
         data = MODEL_WIKI_DATA[model_name]
         
-        st.header(f"{start_idx + i + 1}. {data['title']}")
-        st.caption(f"**개발사:** {data['developer']}")
-        
-        st.markdown(f"**요약:** {data['description']}")
-        
-        st.subheader("🧬 아키텍처 및 기술적 특징")
-        st.markdown(data["architecture"])
-        
-        st.subheader("⚖️ 장단점 분석 (Pros & Cons)")
-        st.markdown(data["pros_cons"])
-        
-        st.subheader("💡 추천 활용 시나리오")
-        st.markdown(data["use_cases"])
-        
-        st.subheader("📊 벤치마크 퍼포먼스 및 요구사항")
-        st.info(data["benchmark"])
-        
-        # 마지막 항목 제외 가로선 추가
-        if i < len(page_models) - 1:
-            st.markdown("---")
+        with st.expander(f"📦 **{start_idx + i + 1}. {data['title']}**"):
+            st.caption(f"**개발사:** {data['developer']}")
+            st.markdown(f"**요약:** {data['description']}")
+            
+            st.subheader("🧬 아키텍처 및 기술적 특징")
+            st.markdown(data["architecture"])
+            
+            st.subheader("⚖️ 장단점 분석 (Pros & Cons)")
+            st.markdown(data["pros_cons"])
+            
+            st.subheader("💡 추천 활용 시나리오")
+            st.markdown(data["use_cases"])
+            
+            st.subheader("📊 벤치마크 퍼포먼스 및 요구사항")
+            st.info(data["benchmark"])
             
     # 하단 네비게이션 복제
     st.divider()
