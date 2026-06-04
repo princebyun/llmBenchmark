@@ -191,12 +191,8 @@ def render():
                     
                     progress_placeholder = st.empty()
                     
-                    popup = st.empty()
-                    popup.markdown(show_custom_spinner(f"'{selected_model_info['name']}' 성능 측정 중... 잠시만 기다려주세요"), unsafe_allow_html=True)
-                    
                     result = benchmark_model(selected_model_info, target_ip, prompt_text, progress_placeholder)
                         
-                    popup.empty()
                     progress_placeholder.empty()
                     
                     if result["success"]:
