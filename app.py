@@ -1,6 +1,6 @@
 import streamlit as st
 from streamlit_option_menu import option_menu
-from views import tab_benchmark, tab_leaderboard, tab_history, tab_model_wiki, tab_methodology, tab_blog
+from views import tab_settings, tab_benchmark, tab_leaderboard, tab_history, tab_model_wiki, tab_methodology, tab_blog
 
 # ==========================================
 # 1. 페이지 설정 및 초기화
@@ -37,7 +37,8 @@ with st.sidebar:
     menu_choice = option_menu(
         menu_title=None,
         options=[
-            "내 하드웨어 진단", 
+            "진단 환경 설정",
+            "벤치마크 실행", 
             "벤치마크 이력",
             "글로벌 리더보드", 
             "모델 사전",
@@ -45,6 +46,7 @@ with st.sidebar:
             "가이드 & 블로그"
         ],
         icons=[
+            'sliders',
             'rocket', 
             'clock-history',
             'trophy', 
@@ -62,7 +64,9 @@ with st.sidebar:
         }
     )
 
-if menu_choice == "내 하드웨어 진단":
+if menu_choice == "진단 환경 설정":
+    tab_settings.render()
+elif menu_choice == "벤치마크 실행":
     tab_benchmark.render()
 elif menu_choice == "벤치마크 이력":
     tab_history.render()
