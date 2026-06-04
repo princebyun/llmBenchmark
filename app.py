@@ -37,18 +37,18 @@ with st.sidebar:
     menu_choice = option_menu(
         menu_title=None,
         options=[
-            "PC 하드웨어 진단",
             "벤치마크 실행", 
             "벤치마크 이력",
+            "PC 하드웨어 진단",
             "글로벌 리더보드", 
             "모델 사전",
             "측정 방법론",
             "가이드 & 블로그"
         ],
         icons=[
-            'sliders',
             'rocket', 
             'clock-history',
+            'sliders',
             'trophy', 
             'book-half',
             'calculator',
