@@ -327,7 +327,7 @@ with tab1:
                 
                 st.subheader("성능 달성률 진단")
                 fig = draw_gauge_chart(result['tps'], target_tps)
-                st.plotly_chart(fig, use_container_width=True)
+                st.plotly_chart(fig, width='stretch')
             else:
                 st.error(f"🚨 **벤치마크 실패!**\n\n모델 서버와의 통신 중 오류가 발생했습니다.\n\n**상세 오류:** `{result['error']}`")
                 st.toast("벤치마크에 실패했습니다. 서버 상태를 확인해주세요.", icon="🚨")
@@ -378,7 +378,7 @@ with tab2:
         df = pd.DataFrame(filtered_data)
         st.dataframe(
             df,
-            use_container_width=True,
+            width='stretch',
             hide_index=True,
             column_config={
                 "파라미터 수 (B)": st.column_config.NumberColumn(format="%.1f B"),
