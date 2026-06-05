@@ -74,7 +74,7 @@ def render():
             
             fig = go.Figure(go.Bar(
                 x=avg_tps[target_col],
-                y=avg_tps[model_col],
+                y=avg_tps[col_model],
                 orientation='h',
                 marker=dict(color='#4F46E5')
             ))
