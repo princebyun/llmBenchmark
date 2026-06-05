@@ -16,12 +16,39 @@ st.set_page_config(
 
 # 세션 상태 초기화 (언어 및 메뉴 인덱스 기본값 설정)
 if "lang" not in st.session_state:
-    st.session_state.lang = "ko"
+    try:
+        accept_lang = st.context.headers.get("Accept-Language", "")
+        # 브라우저 기본 언어에 'ko'가 포함되어 있으면 한국어, 아니면 영어
+        st.session_state.lang = "ko" if "ko" in accept_lang.lower() else "en"
+    except Exception:
+        st.session_state.lang = "ko"
+        
 if "menu_index" not in st.session_state:
     st.session_state.menu_index = 0
 
 def t(key):
     return get_text(st.session_state.lang, key)
+
+# SEO 메타태그 및 lang 동적 주입 (JS)
+seo_desc = t("seo_description")
+seo_lang = st.session_state.lang
+stc.html(f"""
+<script>
+    try {{
+        const parentDoc = window.parent.document;
+        let meta = parentDoc.querySelector('meta[name="description"]');
+        if (!meta) {{
+            meta = parentDoc.createElement('meta');
+            meta.name = "description";
+            parentDoc.getElementsByTagName('head')[0].appendChild(meta);
+        }}
+        meta.content = "{seo_desc}";
+        parentDoc.documentElement.lang = "{seo_lang}";
+    }} catch (e) {{
+        console.error("SEO metadata injection error:", e);
+    }}
+</script>
+""", height=0, width=0)
 
 # 언어 변경 콜백
 def toggle_lang():

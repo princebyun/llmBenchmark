@@ -4,6 +4,7 @@ def get_text(lang, key):
 locales = {
     "ko": {
         # app.py
+        "seo_description": "내 PC의 하드웨어 사양을 진단하고 로컬 LLM(Ollama, LM Studio 등)의 구동 성능(TPS)을 글로벌 리더보드와 비교해 보는 하드웨어 벤치마크 툴입니다.",
         "app_title": "🚀 로컬 LLM 하드웨어 벤치마크 및 진단",
         "app_desc": "Ollama, LM Studio, vLLM, oMLX 등에 설치된 모델을 감지하고 내 PC의 성능(TPS)을 글로벌 기준과 비교합니다.",
         "sidebar_title": "LLM Benchmark",
@@ -143,6 +144,7 @@ locales = {
     },
     "en": {
         # app.py
+        "seo_description": "A hardware benchmark tool that diagnoses your PC specs and compares the running performance (TPS) of local LLMs (Ollama, LM Studio, etc.) against the global leaderboard.",
         "app_title": "🚀 Local LLM Hardware Benchmark & Diagnostics",
         "app_desc": "Detect models installed in Ollama, LM Studio, vLLM, oMLX, and compare your PC's performance (TPS) with global standards.",
         "sidebar_title": "LLM Benchmark",
