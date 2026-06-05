@@ -6,8 +6,8 @@ import base64
 
 def get_csv_download_link(df):
     """데이터프레임을 CSV로 변환하여 다운로드 링크를 생성합니다."""
-    csv = df.to_csv(index=False, encoding='utf-8-sig')
-    b64 = base64.b64encode(csv.encode()).decode()
+    csv = df.to_csv(index=False)
+    b64 = base64.b64encode(csv.encode('utf-8-sig')).decode()
     href = f'<a href="data:file/csv;base64,{b64}" download="benchmark_history.csv" class="btn">📥 CSV 파일로 내보내기</a>'
     return href
 
