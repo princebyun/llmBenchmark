@@ -1,22 +1,29 @@
 import streamlit as st
-from data.blog_data import BLOG_POSTS
+from data.blog_data import BLOG_POSTS, BLOG_POSTS_EN
+from locales import get_text
+
+def t(key):
+    return get_text(st.session_state.lang, key)
+
 def render():
-    st.title("📝 로컬 LLM 테크 가이드 및 블로그")
-    st.markdown("""
-    로컬 LLM 환경 구축에 입문하시는 분들을 위해 준비한 **전문가 가이드 및 튜토리얼 아티클**입니다. 
-    아래의 각 포스트 제목을 클릭하여 숨겨진 본문 내용을 확장해 보세요. 로컬 AI 시대의 생존 지식을 넓힐 수 있습니다.
-    """)
+    st.title(t("blog_title"))
+    st.markdown(t("blog_desc"))
     st.divider()
 
-    st.info("💡 **Tip:** 모든 글은 초보자부터 전문가까지 읽기 쉽도록 팁과 예시를 포함하고 있습니다.")
+    tip_text = "💡 **Tip:** 모든 글은 초보자부터 전문가까지 읽기 쉽도록 팁과 예시를 포함하고 있습니다." if st.session_state.lang == "ko" else "💡 **Tip:** All articles include tips and examples for both beginners and experts."
+    st.info(tip_text)
     st.markdown("<br>", unsafe_allow_html=True)
     
-    for i, post in enumerate(BLOG_POSTS):
+    posts = BLOG_POSTS_EN if st.session_state.lang == "en" else BLOG_POSTS
+    
+    for i, post in enumerate(posts):
         with st.expander(f"📖 **Article {i+1}.** {post['title']}"):
             st.markdown("<br>", unsafe_allow_html=True)
             st.markdown(post['content'])
             st.markdown("<br>", unsafe_allow_html=True)
-            st.caption("작성자: Princebyun | 저작권 ⓒ 2026. All rights reserved.")
+            caption_text = "작성자: Princebyun | 저작권 ⓒ 2026. All rights reserved." if st.session_state.lang == "ko" else "Author: Princebyun | Copyright ⓒ 2026. All rights reserved."
+            st.caption(caption_text)
             
     st.divider()
-    st.markdown("더 많은 기술 포스트가 주기적으로 업데이트 될 예정입니다. 계속 방문해 주세요!")
+    footer_text = "더 많은 기술 포스트가 주기적으로 업데이트 될 예정입니다. 계속 방문해 주세요!" if st.session_state.lang == "ko" else "More technical posts will be updated periodically. Keep visiting!"
+    st.markdown(footer_text)

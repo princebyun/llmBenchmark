@@ -295,3 +295,187 @@ M1/M2/M3 맥북이나 맥 미니를 가지고 계시나요? 그렇다면 여러�
     }
 ]
 
+BLOG_POSTS_EN = [
+    {
+        "title": "🔰 Beginner's Complete Guide to Local LLMs: What is a Local LLM?",
+        "content": """
+**The Limits of Cloud AI and the Rise of Local LLMs**
+
+We live in the era of cloud-based Large Language Models (LLMs) like ChatGPT, Claude, and Gemini. While these services boast incredible performance based on massive computing resources, they have fatal flaws: expensive monthly subscriptions, security risks where sensitive data is sent to corporate servers, and the inability to use them offline.
+
+The savior that solves these problems is the **'Local LLM'**.
+
+**What exactly is a Local LLM?**
+
+It means downloading the AI's brain (parameter weights) directly onto your PC, laptop, or smartphone, rather than using central servers. Even without the internet, the AI uses your CPU and GPU to generate text, translate, and write code.
+
+Thanks to the dedication of Llama.cpp developers and **'Quantization'** technology, anyone with 8GB RAM or a decent gaming GPU (like RTX 3060) can run a free, private ChatGPT in their room.
+
+**Top 3 Tools to Start with Local LLMs:**
+1. **Ollama:** Just like Docker, a single command (`ollama run llama3`) downloads and runs the model.
+2. **LM Studio:** The most beginner-friendly GUI, resembling an App Store. Search, click download, and chat.
+3. **vLLM / oMLX:** For developers requiring high-performance serving (thousands of tokens/sec) or maximizing Apple Silicon (M1, M2) performance.
+        """
+    },
+    {
+        "title": "🛠️ Installing and Starting Ollama (Windows / Mac / Linux)",
+        "content": """
+Ollama is currently the most loved local LLM platform globally. It compresses complex Python setups and Hugging Face downloads into a single click and command.
+
+**Installation Guide by OS:**
+- **Mac OS:** Download from ollama.com, unzip, and drag to Applications.
+- **Windows:** Download the `.exe` installer. Next, next, finish. (WSL2 recommended).
+- **Linux:** Run `curl -fsSL https://ollama.com/install.sh | sh` in the terminal.
+
+**Running Your First Model (Llama 3):**
+Open CMD or Terminal and type:
+```bash
+ollama run llama3
+```
+It downloads the 4.7GB model and changes the prompt to `>>>`. Start chatting with your AI!
+
+**Useful Commands:**
+- `ollama list`: Show downloaded models.
+- `ollama rm [model]`: Delete a model.
+- `ollama pull [model]`: Download without running.
+        """
+    },
+    {
+        "title": "🖥️ Running Local LLMs with LM Studio GUI",
+        "content": """
+If you dislike black terminal screens, **LM Studio** is the perfect solution. It's a GUI program that lets anyone search, download, and chat like using a smartphone App Store.
+
+**3 Powerful Features:**
+1. **Hugging Face 1-Click Search:** Search 'Llama 3' and download GGUF files instantly.
+2. **Hardware-tailored RAM Warning:** Shows if a model fits your VRAM using green/yellow/red indicators.
+3. **Built-in Local Server (OpenAI Compatible):** Turn your PC into a cloud API server compatible with LangChain or this benchmark site.
+
+**How to Use:**
+1. Install from lmstudio.ai.
+2. Search a model in the top bar.
+3. Download a `.gguf` file (Q4_K_M is recommended).
+4. Go to the Chat tab (bubble icon).
+5. Load the model from the top center drop-down.
+6. Chat! (Tip: Maximize `GPU Offload` on the right panel for a 10x speed boost).
+        """
+    },
+    {
+        "title": "🧠 What is Quantization? INT4, INT8, FP16 Explained",
+        "content": """
+When starting with local LLMs, you'll encounter terms like **Quantization, GGUF, Q4, and FP16**.
+
+**The Diet for Decimals:**
+AI parameter weights are originally 16-bit floating points (FP16), e.g., `3.14159265`. An 8B FP16 model takes over 16GB VRAM, requiring expensive hardware.
+Developers thought: "What if we truncate the decimals?" This is Quantization: compressing data into 8-bit (INT8) or 4-bit (INT4) integers.
+
+**Comparison:**
+- **FP16 (16-bit):** Original, smartest, but massive VRAM usage.
+- **INT8 (8-bit):** High quality, halves VRAM, minimal intelligence loss.
+- **INT4 (8-bit):** The popular standard. Crushes size to 1/4 (4-5GB for 8B). Outstanding speed/cost ratio for average desktops.
+
+Look for **`Q4_K_M`** or **`INT4`** files for the best balance!
+        """
+    },
+    {
+        "title": "💡 Prompt Engineering 101: 7 Tips for Better Answers",
+        "content": """
+The difference between a "dumb AI" and a "perfect coding assistant" is how you write prompts.
+
+**1. Role-Playing:** Give the AI a persona. "You are a 15-year senior Python developer..."
+**2. Specify Output Format:** Ask for markdown, tables, or JSON.
+**3. Chain of Thought:** Add "Let's think step by step." to solve logic puzzles.
+**4. Do rather than Don't:** Use positive instructions ("Use simple words") instead of negative ("Don't use jargon").
+**5. Few-Shot Prompting:** Provide examples. "Apple: Fruit, Onion: Veggie, Pork: Meat, Strawberry: [ ]"
+**6. Markdown Delimiters:** Use `'''` or `###` to separate instructions from context.
+**7. Emotional Appeal:** Say "This is crucial for my career, I'll tip you $100." Studies show it slightly improves quality.
+        """
+    },
+    {
+        "title": "🔥 GPU vs CPU: Impact on Local LLM Performance",
+        "content": """
+Why do some get 50 TPS while others get 2 TPS? It depends on whether the GPU or CPU does the math.
+
+**The Sorrow of CPU Inference:**
+LLMs are matrix multiplications. High-end CPUs have 16-24 genius cores but process slowly (2-5 TPS).
+
+**GPU: The Ruler of the AI Era:**
+NVIDIA GPUs have thousands of CUDA cores. They handle parallel math simultaneously, crushing CPUs.
+
+**VRAM Bottleneck:**
+The entire model must fit in the GPU's VRAM. If an 8GB GPU tries to run a 10GB model, 2GB spills over to system RAM (CPU fallback). Traveling the PCIe bus causes a massive bottleneck, dropping speed by 75%.
+
+**Conclusion:** Buy GPUs with the most VRAM (RTX 3060 12GB, RTX 4060 Ti 16GB) or use 4-bit Quantization (GGUF Q4) to fit models perfectly into VRAM.
+        """
+    },
+    {
+        "title": "📊 What is TPS? LLM Benchmark Metrics Explained",
+        "content": """
+Like Horsepower (HP) for cars, LLMs use **TPS** and **TTFT**.
+
+**1. TPS (Tokens Per Second): Text Generation Speed**
+"How many words can the AI type per second?"
+- **1~5 TPS:** Very slow, frustrating.
+- **10~20 TPS:** Average, like human reading speed.
+- **40~60 TPS:** Very comfortable (RTX 30/40 series).
+- **100+ TPS:** Ultra-fast (High-end servers or light models).
+
+**2. TTFT (Time To First Token): Reaction Time**
+The delay from pressing 'Enter' to seeing the first character.
+- Under **2 seconds** feels instantaneous.
+- Over 10-20 seconds means the model is loading from a slow HDD. Use an NVMe SSD!
+
+If your TPS is >30 and TTFT <1s, your local AI environment is excellent.
+        """
+    },
+    {
+        "title": "🔒 Security Advantages: Local LLM vs Cloud AI",
+        "content": """
+Major corporations banned ChatGPT due to **Security and Data Leakage**.
+
+**Cloud AI Risks:**
+Pasting sensitive code or meeting notes sends data to corporate servers permanently. Even with privacy policies, the risk of hacks or internal leaks remains.
+
+**Local LLM Privacy:**
+The AI runs locally. You can cut the internet cable and it still works.
+1. **Air-Gapped:** Works in isolated military or financial intranets.
+2. **Zero Trust:** Prompts never leave your RAM and GPU (0 Bytes outbound).
+3. **Compliance:** Perfect for GDPR or HIPAA sensitive medical data.
+
+It's the ultimate secure environment for your confidential data.
+        """
+    },
+    {
+        "title": "⚡ Building High-Performance Serving with vLLM",
+        "content": """
+If you are a startup dev serving thousands of concurrent users, Ollama will crash (OOM). Enter **vLLM** from UC Berkeley.
+
+**The Magic: PagedAttention**
+Normally, user conversation history (KV Cache) hogs VRAM inefficiently. vLLM uses OS-style 'Paging' to allocate memory dynamically, reducing waste to near 0%.
+
+**Throughput Boost:**
+It achieves up to **24x higher throughput** than standard HuggingFace Transformers on the same hardware.
+
+**Installation:**
+```bash
+pip install vllm
+python -m vllm.entrypoints.openai.api_server --model meta-llama/Meta-Llama-3-8B
+```
+Instantly deploy a high-performance, OpenAI-compatible local AI server.
+        """
+    },
+    {
+        "title": "🍎 oMLX: Optimizing LLMs on Mac (Apple Silicon)",
+        "content": """
+While NVIDIA dominates, Apple Silicon (M1/M2/M3) is a hidden cheat code for local LLMs due to **Unified Memory**.
+
+**Insane Specs:**
+Getting 192GB VRAM on a PC costs tens of thousands. A Mac Studio Ultra offers 192GB Unified Memory that the GPU can use entirely! You can run 70B models easily.
+
+**MLX Framework:**
+Apple released 'MLX', an open-source framework similar to PyTorch, optimized to push Apple GPUs to the limit.
+
+**oMLX:**
+Community wrappers like 'oMLX' let you download, quantize, and run models natively on M-chips with a single click. Mac users are already excellent AI researchers with vast memory!
+        """
+    }
+]

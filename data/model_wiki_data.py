@@ -365,3 +365,365 @@ MODEL_WIKI_DATA = {
 
 }
 
+MODEL_WIKI_DATA_EN = {
+    "Meta Llama 4 시리즈 (Scout, Maverick 등)": {
+        "title": "Meta Llama 4 Series (Scout, Maverick, etc.)",
+        "description": "The pinnacle of open-source as of 2025~2026. A perfect 4th-generation lineup introducing native multimodal capabilities and MoE (Mixture of Experts).",
+        "developer": "Meta AI",
+        "architecture": "Llama 4 Scout (109B, 17B active), Maverick (400B). Supports up to 10M token context.",
+        "pros_cons": "**Pros:**\n- Overwhelming reasoning, native image/video understanding, vast 10M token memory\n\n**Cons:**\n- Extremely high VRAM requirement due to MoE structure",
+        "use_cases": "- Enterprise large-scale AI assistant, automated video analysis",
+        "benchmark": "Scout 109B: 60GB VRAM / Maverick: 200GB+ VRAM"
+    },
+    "Meta Llama 3 시리즈 (8B, 70B)": {
+        "title": "Meta Llama 3 Series (8B, 70B)",
+        "description": "The legendary 3rd-generation model that popularized local LLMs. Still widely used for its cost-effectiveness.",
+        "developer": "Meta AI",
+        "architecture": "Transformer decoder, 8K context, Grouped Query Attention (GQA).",
+        "pros_cons": "**Pros:**\n- Overwhelming intelligence for its size, massive ecosystem and optimization resources\n\n**Cons:**\n- Limited context (8K) and lack of multimodal features compared to Llama 4",
+        "use_cases": "- Daily chatbot, code generation, text summarization",
+        "benchmark": "8B: 6GB VRAM / 70B: 40GB VRAM"
+    },
+    "CodeLlama 시리즈 (7B~70B)": {
+        "title": "CodeLlama Series (7B~70B)",
+        "description": "A legacy developer model maximizing coding capabilities based on Llama 2.",
+        "developer": "Meta AI",
+        "architecture": "Up to 100K token support, specialized training in Python/C++.",
+        "pros_cons": "**Pros:**\n- Extensive language support, deep understanding of long code contexts\n\n**Cons:**\n- Weak in general conversation or non-English queries",
+        "use_cases": "- Local Copilot integration, code auto-completion",
+        "benchmark": "5.5GB ~ 40GB VRAM depending on size"
+    },
+    "Google Gemma 4 시리즈": {
+        "title": "Google Gemma 4 Series",
+        "description": "Google's latest release from April 2026. Equipped with multimodal (text, image, audio) and a self-reflecting 'Thinking' mode.",
+        "developer": "Google DeepMind",
+        "architecture": "256K context, native Function Calling, E-series (for Edge).",
+        "pros_cons": "**Pros:**\n- Excellent reasoning, processes image/audio simultaneously on-device\n\n**Cons:**\n- Some older local tools do not support it yet",
+        "use_cases": "- Academic paper analysis, complex multimodal information retrieval",
+        "benchmark": "E-series: 4GB / Large models: 30GB VRAM"
+    },
+    "Google Gemma 2 시리즈 (2B, 9B, 27B)": {
+        "title": "Google Gemma 2 Series (2B, 9B, 27B)",
+        "description": "High-performance 2nd-generation lineup built with Gemini technology that threatened Llama 3.",
+        "developer": "Google DeepMind",
+        "architecture": "8K context, Sliding Window Attention applied.",
+        "pros_cons": "**Pros:**\n- Great factual accuracy and fast generation\n\n**Cons:**\n- Awkward VRAM requirements due to unusual parameter counts (9B, 27B)",
+        "use_cases": "- Academic paper analysis, accurate info search",
+        "benchmark": "9B: 6.5GB / 27B: 18GB VRAM"
+    },
+    "Qwen 3 & 3.7 시리즈 (30B~235B)": {
+        "title": "Qwen 3 & 3.7 Series (30B~235B)",
+        "description": "Alibaba's monster released in 2025~2026. Armed with Agentic features and multimodal.",
+        "developer": "Alibaba Cloud",
+        "architecture": "Qwen3-235B (MoE), Qwen3-30B (3B active). Latest 3.7 version released May 2026.",
+        "pros_cons": "**Pros:**\n- Best performance in Asia, perfect multi-language translation & coding, overwhelming speed\n\n**Cons:**\n- Deep Chinese knowledge sometimes makes Western cultural answers awkward",
+        "use_cases": "- Pro multi-language translator, coding & agent bots",
+        "benchmark": "30B MoE: 18GB / 235B: 120GB VRAM"
+    },
+    "Qwen 2 시리즈 (0.5B ~ 72B)": {
+        "title": "Qwen 2 Series (0.5B ~ 72B)",
+        "description": "The 2nd-generation model from the Qwen family that took the world by storm. Extremely strong in math.",
+        "developer": "Alibaba Cloud",
+        "architecture": "Up to 128K context, pre-trained on 29 languages.",
+        "pros_cons": "**Pros:**\n- Incredibly natural multi-language speaking, top-tier math skills\n\n**Cons:**\n- Outperformed by the latest 3rd-generation architecture",
+        "use_cases": "- Maintenance of legacy multi-language services",
+        "benchmark": "7B: 5.5GB / 72B: 42GB VRAM"
+    },
+    "Qwen-VL / Audio": {
+        "title": "Qwen-VL / Audio",
+        "description": "The 1st-generation multimodal lineup understanding images and sound alongside text.",
+        "developer": "Alibaba Cloud",
+        "architecture": "Architecture combining visual and audio encoders.",
+        "pros_cons": "**Pros:**\n- Accurately recognizes text in images (OCR) and situations\n\n**Cons:**\n- Consumes much more VRAM than text-only models",
+        "use_cases": "- Image captioning, photo description for the visually impaired",
+        "benchmark": "Minimum 10GB VRAM"
+    },
+    "Microsoft Phi-3 (Mini, Small, Medium)": {
+        "title": "Microsoft Phi-3 (Mini, Small, Medium)",
+        "description": "The miracle of SLM (Small Language Models). Unfolds GPT-3.5 level logic with a tiny footprint.",
+        "developer": "Microsoft",
+        "architecture": "Intensively trained on highly refined, Textbook-quality data.",
+        "pros_cons": "**Pros:**\n- Extremely low VRAM consumption, overwhelming logic\n\n**Cons:**\n- The model's brain is too small to hold all worldly knowledge, causing frequent hallucinations",
+        "use_cases": "- Offline mobile apps, simple text summarization",
+        "benchmark": "Mini(3.8B): 3GB / Medium(14B): 9GB VRAM"
+    },
+    "WizardLM 시리즈 (7B ~ 70B)": {
+        "title": "WizardLM Series (7B ~ 70B)",
+        "description": "A model trained on Instruction Complexity to enhance command execution capabilities.",
+        "developer": "Microsoft/WizardLM",
+        "architecture": "Evol-Instruct technique applied.",
+        "pros_cons": "**Pros:**\n- Accurately follows complex and multi-step user instructions\n\n**Cons:**\n- Limited if not applied to the latest base models (like Llama 4)",
+        "use_cases": "- Assistant for executing complex commands",
+        "benchmark": "Varies by size (5.5GB ~ 40GB)"
+    },
+    "DeepSeek V2 & Coder V2 (236B)": {
+        "title": "DeepSeek V2 & Coder V2 (236B)",
+        "description": "The revolutionary MoE lineup with insane cost-effectiveness that dominated 2024~2025.",
+        "developer": "DeepSeek AI",
+        "architecture": "236B MoE (21B active), Multi-Head Latent Attention (MLA) technology.",
+        "pros_cons": "**Pros:**\n- Extremely low VRAM usage for its top-tier speed and coding ability (thanks to MLA)\n\n**Cons:**\n- Difficult to setup and optimize (vLLM, etc.)",
+        "use_cases": "- Top-tier local coding assistant, complex chatbot",
+        "benchmark": "Can run on 24GB VRAM based on 21B active"
+    },
+    "DeepSeek LLM (7B, 67B)": {
+        "title": "DeepSeek LLM (7B, 67B)",
+        "description": "A strong early general language model serving as the foundation of DeepSeek's tech.",
+        "developer": "DeepSeek AI",
+        "architecture": "Large-scale pre-training focused on Chinese and English.",
+        "pros_cons": "**Pros:**\n- Excellent mathematical reasoning and very fast responsiveness\n\n**Cons:**\n- Awkwardness remains in translation and conversation for other languages",
+        "use_cases": "- Math paper summarization, EN-CN translation",
+        "benchmark": "7B: 5.5GB / 67B: 38GB VRAM"
+    },
+    "Mistral v0.3 & NeMo 12B": {
+        "title": "Mistral v0.3 & NeMo 12B",
+        "description": "Mistral's powerful latest dense models leading the open-source ecosystem.",
+        "developer": "Mistral AI",
+        "architecture": "Supports Function Calling, Tekken tokenizer.",
+        "pros_cons": "**Pros:**\n- Cost-effectiveness exceeding its class, free text generation with little censorship\n\n**Cons:**\n- Lack of safety rails requires careful filtering for commercial use",
+        "use_cases": "- Creative writing, web novel generation",
+        "benchmark": "7B: 5.5GB / 12B: 8GB VRAM"
+    },
+    "Mixtral (8x7B, 8x22B)": {
+        "title": "Mixtral (8x7B, 8x22B)",
+        "description": "An MoE architecture model where multiple experts collaborate.",
+        "developer": "Mistral AI",
+        "architecture": "MoE (Mixture of Experts). Active parameters are about 1/4 of the total.",
+        "pros_cons": "**Pros:**\n- Very fast output speed despite having massive knowledge\n\n**Cons:**\n- Memory (VRAM) usage still takes up the entire massive size",
+        "use_cases": "- Enterprise multipurpose chatbot, comprehensive knowledge search",
+        "benchmark": "8x7B: 26GB / 8x22B: 80GB VRAM"
+    },
+    "Upstage Solar 10.7B": {
+        "title": "Upstage Solar 10.7B",
+        "description": "A masterpiece model created by Upstage (Korea) that reached global #1.",
+        "developer": "Upstage",
+        "architecture": "Extended architecture based on Llama 2 via Depth Up-Scaling (DUS).",
+        "pros_cons": "**Pros:**\n- Benchmark performance beating 30B models at a 10B size, excellent Korean understanding\n\n**Cons:**\n- Cost-effectiveness slightly dropped due to newer generation models",
+        "use_cases": "- Building Korean-centric chatbot services",
+        "benchmark": "7.5GB VRAM"
+    },
+    "Upstage Solar Pro": {
+        "title": "Upstage Solar Pro",
+        "description": "The latest upgraded version succeeding Solar 10.7B.",
+        "developer": "Upstage",
+        "architecture": "Significantly improved Korean tuning and context expansion.",
+        "pros_cons": "**Pros:**\n- The most perfect and natural Korean sentences and logical reasoning\n\n**Cons:**\n- Relatively narrow ecosystem support compared to overseas models",
+        "use_cases": "- Intranet AI engine for Korean enterprises",
+        "benchmark": "8GB VRAM"
+    },
+    "Command R+ (104B)": {
+        "title": "Command R+ (104B)",
+        "description": "An enterprise-grade massive model pushing RAG (Retrieval-Augmented Generation) performance to the limit.",
+        "developer": "Cohere",
+        "architecture": "104B parameters, specialized in Tool Use, 128K context.",
+        "pros_cons": "**Pros:**\n- Top open-source accuracy and hallucination suppression\n\n**Cons:**\n- Too heavy to run on personal equipment",
+        "use_cases": "- Corporate internal document search (RAG) systems",
+        "benchmark": "Minimum 60GB VRAM"
+    },
+    "Command R (35B)": {
+        "title": "Command R (35B)",
+        "description": "The smaller sibling of Command R+, offering optimal RAG efficiency on 3090/4090 setups.",
+        "developer": "Cohere",
+        "architecture": "35B parameters.",
+        "pros_cons": "**Pros:**\n- Extracts answers most accurately based on provided documents\n\n**Cons:**\n- Somewhat lacks appeal as a general-purpose conversational chatbot",
+        "use_cases": "- Academic paper / Legal document fact-checking",
+        "benchmark": "22GB VRAM"
+    },
+    "Grok-1.5 (초거대 MoE)": {
+        "title": "Grok-1.5 (Massive MoE)",
+        "description": "The Grok series released by Elon Musk's xAI. Shocked the open-source ecosystem.",
+        "developer": "xAI",
+        "architecture": "Massive parameter MoE architecture, 128K long context.",
+        "pros_cons": "**Pros:**\n- Vast global knowledge, humorous and unrestricted witty answer style\n\n**Cons:**\n- Terrifying size impossible to run on regular desktops",
+        "use_cases": "- Large-scale AI clusters and supercomputer research",
+        "benchmark": "Minimum 200GB VRAM+"
+    },
+    "DBRX (132B)": {
+        "title": "DBRX (132B)",
+        "description": "An ultra-large open-source MoE model of 132B released by Databricks.",
+        "developer": "Databricks",
+        "architecture": "Fine-grained Mixture-of-Experts architecture.",
+        "pros_cons": "**Pros:**\n- Fast speed and strong coding/math/logic performance\n\n**Cons:**\n- Heavy footprint",
+        "use_cases": "- Large-scale enterprise analytics systems",
+        "benchmark": "80GB VRAM+"
+    },
+    "Falcon (7B, 40B, 180B)": {
+        "title": "Falcon (7B, 40B, 180B)",
+        "description": "An innovative lineup trained with massive UAE capital and released completely free for commercial use.",
+        "developer": "TII",
+        "architecture": "Custom Transformer architecture.",
+        "pros_cons": "**Pros:**\n- Completely open license with zero commercial restrictions\n\n**Cons:**\n- Lower speed and token efficiency compared to newer models due to older architecture",
+        "use_cases": "- Building commercial services without license limits",
+        "benchmark": "40B: 24GB / 180B: 100GB+"
+    },
+    "Yi 시리즈 (6B, 34B)": {
+        "title": "Yi Series (6B, 34B)",
+        "description": "A masterpiece from China's 01.AI specialized in maintaining long text contexts.",
+        "developer": "01.AI",
+        "architecture": "Supports an overwhelming context length up to 200K.",
+        "pros_cons": "**Pros:**\n- Incredible long-term memory to remember dozens of novels at once\n\n**Cons:**\n- Rapidly increasing VRAM consumption when using long contexts",
+        "use_cases": "- Translating full novels, reviewing massive legal/medical docs",
+        "benchmark": "6B: 5GB / 34B: 22GB VRAM"
+    },
+    "Vicuna (7B, 13B, 33B)": {
+        "title": "Vicuna (7B, 13B, 33B)",
+        "description": "The textbook model for Chat tuning that has been loved for the longest time.",
+        "developer": "LMSYS",
+        "architecture": "Fine-tuned with high-quality user conversation data from ShareGPT.",
+        "pros_cons": "**Pros:**\n- Smooth and engaging conversational tone, like chatting with a real person\n\n**Cons:**\n- Lacks recent knowledge and multi-language support",
+        "use_cases": "- Chatbot UI/UX prototyping",
+        "benchmark": "Varies by size"
+    },
+    "Zephyr (7B, 141B)": {
+        "title": "Zephyr (7B, 141B)",
+        "description": "A very friendly model that popularized DPO (Direct Preference Optimization).",
+        "developer": "Hugging Face H4",
+        "architecture": "Applied DPO reinforcement learning on Mistral and Mixtral bases.",
+        "pros_cons": "**Pros:**\n- Executes user instructions with extreme dedication and positivity\n\n**Cons:**\n- Tends to answer in English even if asked in other languages",
+        "use_cases": "- Friendly English-based customer support bot",
+        "benchmark": "7B: 5.5GB / 141B: 80GB VRAM"
+    },
+    "OpenChat 3.5": {
+        "title": "OpenChat 3.5",
+        "description": "A miracle tuned model that dominated benchmarks using only open-source data.",
+        "developer": "OpenChat",
+        "architecture": "C-RLFT technique (Conditioned Reinforcement Learning).",
+        "pros_cons": "**Pros:**\n- Near-perfect coding and daily conversation from a small 7B size\n\n**Cons:**\n- Usage declined due to overlapping position after Llama 3's release",
+        "use_cases": "- General-purpose local assistant",
+        "benchmark": "5.5GB VRAM"
+    },
+    "TinyLlama 1.1B": {
+        "title": "TinyLlama 1.1B",
+        "description": "A micro toy model designed to run even in web browsers.",
+        "developer": "Open Source",
+        "architecture": "1.1B micro architecture, trained on 3T tokens.",
+        "pros_cons": "**Pros:**\n- Extreme lightness, theoretically runnable on Raspberry Pi or smartwatches\n\n**Cons:**\n- Cannot handle complex logic or multi-language well",
+        "use_cases": "- LLM education and structural testing",
+        "benchmark": "Under 1.5GB VRAM"
+    },
+    "StarCoder 2 (3B, 7B, 15B)": {
+        "title": "StarCoder 2 (3B, 7B, 15B)",
+        "description": "A pure open-source code generator built by a coalition of developers worldwide.",
+        "developer": "BigCode",
+        "architecture": "Trained on over 600 programming languages.",
+        "pros_cons": "**Pros:**\n- Vast code knowledge covering almost all minor programming languages\n\n**Cons:**\n- Severely lacks general conversational (Chat) abilities",
+        "use_cases": "- VSC background auto-completion server",
+        "benchmark": "15B: 10GB VRAM"
+    },
+    "Jamba 1.5": {
+        "title": "Jamba 1.5",
+        "description": "An innovative hybrid model breaking the limits of traditional Transformers.",
+        "developer": "AI21 Labs",
+        "architecture": "Mamba 2 (SSM) + Transformer Hybrid architecture.",
+        "pros_cons": "**Pros:**\n- VRAM and computation barely increase even when processing extremely long texts\n\n**Cons:**\n- Ecosystem tools support (like Ollama) is still somewhat limited",
+        "use_cases": "- Analyzing an entire novel at once",
+        "benchmark": "12GB VRAM"
+    },
+    "OLMo (1B, 7B)": {
+        "title": "OLMo (1B, 7B)",
+        "description": "A 100% truly open model that released training code and data for AI research transparency.",
+        "developer": "Allen AI",
+        "architecture": "Training data (Dolma) and scripts fully open.",
+        "pros_cons": "**Pros:**\n- Transparent data origins leave no room for license disputes\n\n**Cons:**\n- Benchmark performance itself is lower compared to other 7B models",
+        "use_cases": "- Pure base for corporate fine-tuning",
+        "benchmark": "5.5GB VRAM"
+    },
+    "Stable LM 2 (1.6B, 12B)": {
+        "title": "Stable LM 2 (1.6B, 12B)",
+        "description": "A language model created by the company famous for Stable Diffusion.",
+        "developer": "Stability AI",
+        "architecture": "Optimal mix ratio of various datasets applied.",
+        "pros_cons": "**Pros:**\n- Transparent and excellent English generation quality\n\n**Cons:**\n- Lower awareness and lacks multi-language tuning compared to competitors",
+        "use_cases": "- Lightweight English text generator",
+        "benchmark": "1.6B: 2GB VRAM"
+    },
+    "LLaVA 시리즈": {
+        "title": "LLaVA Series",
+        "description": "The multimodal pioneer that gave 'eyes' to Llama models to see images.",
+        "developer": "UW/MSR",
+        "architecture": "Vision Encoder (CLIP) + Language Model (Llama/Vicuna) combined.",
+        "pros_cons": "**Pros:**\n- Describes input images extremely detailed and accurately in text\n\n**Cons:**\n- Heavier and slower than processing only plain text",
+        "use_cases": "- Vision-based Question Answering (VQA)",
+        "benchmark": "Minimum 8GB VRAM"
+    },
+    "Phind-CodeLlama 34B": {
+        "title": "Phind-CodeLlama 34B",
+        "description": "An overwhelming coding model tuned by the developer search engine Phind.",
+        "developer": "Phind",
+        "architecture": "CodeLlama 34B base + High-quality prompt response tuning.",
+        "pros_cons": "**Pros:**\n- Magically finds solutions when thrown complex error codes\n\n**Cons:**\n- The 34B weight makes it hard for average users to run",
+        "use_cases": "- Code debugging assistant for senior developers",
+        "benchmark": "22GB VRAM"
+    },
+    "InternLM 2.5 (1.8B, 7B, 20B)": {
+        "title": "InternLM 2.5 (1.8B, 7B, 20B)",
+        "description": "A recent model specialized in very long text processing developed by Shanghai AI Lab.",
+        "developer": "Shanghai AI Lab",
+        "architecture": "Up to 1000K context, exceptional document summarization.",
+        "pros_cons": "**Pros:**\n- Minimal info loss when swallowing and summarizing massive documents\n\n**Cons:**\n- Contains Chinese language bias",
+        "use_cases": "- Large-scale document analyzer for enterprises",
+        "benchmark": "20B: 14GB VRAM"
+    },
+    "Baichuan 2 (7B, 13B)": {
+        "title": "Baichuan 2 (7B, 13B)",
+        "description": "A multi-language model specialized for commerce and medicine from a Chinese AI startup.",
+        "developer": "Baichuan",
+        "architecture": "Trained on 2.6T tokens focused on English and Chinese.",
+        "pros_cons": "**Pros:**\n- Popular for licenses and commercial services within China\n\n**Cons:**\n- Lacks Korean and Western cultural knowledge",
+        "use_cases": "- Service engine targeted at the Greater China region",
+        "benchmark": "13B: 8.5GB VRAM"
+    },
+    "ChatGLM 4": {
+        "title": "ChatGLM 4",
+        "description": "The high-performance 4th-generation GLM architecture model by Tsinghua Univ researchers.",
+        "developer": "Tsinghua Univ",
+        "architecture": "Efficient GLM architecture supporting 128K.",
+        "pros_cons": "**Pros:**\n- Exceptional knowledge search and multi-language ability relative to its low VRAM usage\n\n**Cons:**\n- Cumbersome environment setup",
+        "use_cases": "- Multi-language chatbot for research",
+        "benchmark": "9GB VRAM"
+    },
+    "Orion 14B": {
+        "title": "Orion 14B",
+        "description": "A strong mid-sized model trained on 2.5T tokens of multi-language data.",
+        "developer": "OrionStar",
+        "architecture": "14B class specialized in Asian language processing.",
+        "pros_cons": "**Pros:**\n- High efficiency in processing Asian languages like Japanese and Korean\n\n**Cons:**\n- Overshadowed by the release of Qwen 3",
+        "use_cases": "- Unified Asian multi-language chatbot",
+        "benchmark": "9GB VRAM"
+    },
+    "Xverse (7B, 13B, 65B)": {
+        "title": "Xverse (7B, 13B, 65B)",
+        "description": "A model intensively trained on large-scale multi-language corpora.",
+        "developer": "Xverse",
+        "architecture": "Trained on a massive dataset of 3.2T tokens.",
+        "pros_cons": "**Pros:**\n- The 65B model boasts massive reasoning power\n\n**Cons:**\n- Bias toward Chinese content",
+        "use_cases": "- Large corpus research",
+        "benchmark": "65B: 38GB VRAM"
+    },
+    "Aya 23 (8B, 35B)": {
+        "title": "Aya 23 (8B, 35B)",
+        "description": "A multi-language tuned model specifically made to speak 23 languages like a native.",
+        "developer": "Cohere",
+        "architecture": "Special multi-language fine-tuning, based on Command R.",
+        "pros_cons": "**Pros:**\n- Incredibly smooth translation and understanding of 23 languages including Korean\n\n**Cons:**\n- Coding performance is slightly lacking compared to the newest models",
+        "use_cases": "- Global translator, multi-language CS bot",
+        "benchmark": "8B: 6GB / 35B: 22GB VRAM"
+    },
+    "SeaLLM 3": {
+        "title": "SeaLLM 3",
+        "description": "A specialized model to perfectly cover minor languages in the Southeast Asia (SEA) region.",
+        "developer": "Alibaba",
+        "architecture": "Intensively trained on minority languages like Thai, Vietnamese, and Indonesian.",
+        "pros_cons": "**Pros:**\n- Flawlessly translates Southeast Asian minority languages that even Google Translate struggles with\n\n**Cons:**\n- Low utility for general-purpose tasks",
+        "use_cases": "- SEA localization and global game services",
+        "benchmark": "8GB VRAM"
+    },
+    "OpenHermes 2.5": {
+        "title": "OpenHermes 2.5",
+        "description": "The best 7B tuned model ever made by masterfully mixing numerous datasets.",
+        "developer": "Teknium",
+        "architecture": "Mistral 7B base, combined with a massive amount of custom datasets.",
+        "pros_cons": "**Pros:**\n- Sensibly answers everything from coding to daily chat, like a real human assistant\n\n**Cons:**\n- Base is older, so specs fall behind the latest Llama 4",
+        "use_cases": "- Excellent UI/UX reference for local chatbots",
+        "benchmark": "5.5GB VRAM"
+    }
+}

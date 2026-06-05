@@ -66,6 +66,23 @@
             width: 0%;
             transition: width 0.3s;
         }
+        .progress-bar.animated {
+            background-image: linear-gradient(45deg,rgba(255,255,255,.15) 25%,transparent 25%,transparent 50%,rgba(255,255,255,.15) 50%,rgba(255,255,255,.15) 75%,transparent 75%,transparent);
+            background-size: 1rem 1rem;
+            animation: progress-stripes 1s linear infinite;
+        }
+        @keyframes progress-stripes { from { background-position: 1rem 0; } to { background-position: 0 0; } }
+        .scan-overlay {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(255,255,255,0.8);
+            flex-direction: column; align-items: center; justify-content: center;
+            z-index: 9999; display: none;
+        }
+        .spinner {
+            border: 4px solid #f3f3f3; border-top: 4px solid #10B981;
+            border-radius: 50%; width: 40px; height: 40px; animation: spin 1s linear infinite;
+        }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
         .status-text { font-size: 14px; font-weight: bold; margin-top: 10px; color: #4F46E5; }
         .queue-item {
             display: flex;
@@ -81,7 +98,10 @@
     </style>
 </head>
 <body>
-
+    <div id="scan-overlay" class="scan-overlay">
+        <div class="spinner"></div>
+        <h3 id="scan-overlay-text" style="color:#111827; margin-top:15px;">내 PC 스캔 중입니다...</h3>
+    </div>
     <div id="scan-section" class="card">
         <h4>🤖 1. 로컬 모델 스캔 및 대기열 추가</h4>
         <p style="font-size:14px; color:#6B7280; margin-bottom:10px;">내 PC(localhost)에서 구동 중인 모델을 스캔합니다.</p>
@@ -188,8 +208,9 @@
         }
 
         async function scanModels() {
+            document.getElementById('scan-overlay').style.display = 'flex';
             scanBtn.disabled = true;
-            scanBtn.innerText = "스캔 중...";
+            scanBtn.innerText = props.config.lang === "en" ? "Scanning..." : "스캔 중...";
             availableModels = [];
             modelOptionsMap = {};
             
@@ -248,8 +269,9 @@
                 }
             } catch (e) { console.log("vLLM scan failed", e); }
 
+            document.getElementById('scan-overlay').style.display = 'none';
             scanBtn.disabled = false;
-            scanBtn.innerText = "내 PC 스캔 완료 (다시 스캔)";
+            scanBtn.innerText = props.config.lang === "en" ? "Scan Complete (Rescan)" : "내 PC 스캔 완료 (다시 스캔)";
 
             if (availableModels.length > 0) {
                 document.getElementById('cors-error-msg').style.display = "none";
@@ -344,12 +366,13 @@
                         if (firstTokenTime === null) firstTokenTime = performance.now();
                         
                         const data = JSON.parse(line);
-                        if (data.message && data.message.content) {
-                            fullResponse += data.message.content;
-                            tokenCount++;
-                            logBox.innerText = fullResponse;
-                            logBox.scrollTop = logBox.scrollHeight;
-                        }
+                            if (data.message && data.message.content) {
+                                fullResponse += data.message.content;
+                                tokenCount++;
+                                const tStr = props.config.lang === "en" ? `Generating... Tokens: ${tokenCount}` : `생성 중... 현재 토큰: ${tokenCount} 개`;
+                                logBox.innerText = tStr;
+                                logBox.scrollTop = logBox.scrollHeight;
+                            }
                         
                         if (data.done) {
                             const evalCount = data.eval_count || 0;
@@ -432,7 +455,8 @@
                                 if (content) {
                                     fullResponse += content;
                                     tokenCount++;
-                                    logBox.innerText = fullResponse;
+                                    const tStr = props.config.lang === "en" ? `Generating... Tokens: ${tokenCount}` : `생성 중... 현재 토큰: ${tokenCount} 개`;
+                                    logBox.innerText = tStr;
                                     logBox.scrollTop = logBox.scrollHeight;
                                 }
                             }
@@ -534,11 +558,15 @@
             
             let finalResults = [];
             
+            progressBar.classList.add("animated");
+            
             for (let i = 0; i < queue.length; i++) {
                 const qName = queue[i];
                 const mInfo = modelOptionsMap[qName];
                 
-                statusText.innerText = `[${i+1}/${queue.length}] ${mInfo.name} 벤치마크 진행 중...`;
+                statusText.innerText = props.config.lang === "en" 
+                    ? `[${i+1}/${queue.length}] Benchmarking ${mInfo.name}...` 
+                    : `[${i+1}/${queue.length}] ${mInfo.name} 벤치마크 진행 중...`;
                 progressBar.style.width = `${((i) / queue.length) * 100}%`;
                 
                 const res = await runSingleBenchmark(mInfo, promptCategory, promptText);
@@ -550,13 +578,15 @@
                         result: res
                     });
                 } else {
-                    logBox.innerText = `\n[실패] ${mInfo.name}: ${res.error}\n`;
+                    const failMsg = props.config.lang === "en" ? "Failed" : "실패";
+                    logBox.innerText = `\n[${failMsg}] ${mInfo.name}: ${res.error}\n`;
                 }
                 progressBar.style.width = `${((i+1) / queue.length) * 100}%`;
             }
             
-            statusText.innerText = `✅ 모든 벤치마크 완료! 결과를 전송합니다...`;
-            logBox.innerText = "Python으로 결과를 보내고 있습니다.";
+            progressBar.classList.remove("animated");
+            statusText.innerText = props.config.lang === "en" ? `✅ All benchmarks completed! Sending results...` : `✅ 모든 벤치마크 완료! 결과를 전송합니다...`;
+            logBox.innerText = props.config.lang === "en" ? "Sending results to Python." : "Python으로 결과를 보내고 있습니다.";
             
             // Send final payload to Python
             sendDataToPython({ results: finalResults });
@@ -575,6 +605,20 @@
                         opt.value = key;
                         opt.innerText = key;
                         promptSelect.appendChild(opt);
+                    }
+                    
+                    if (props.config.lang === "en") {
+                        document.querySelector('#scan-section h4').innerText = "🤖 1. Scan Local Models";
+                        document.querySelector('#scan-section p').innerText = "Scans for running models on localhost.";
+                        scanBtn.innerText = "Scan My PC";
+                        addQueueBtn.innerText = "Add to Queue";
+                        document.querySelector('#queue-section h4').innerText = "✅ 2. Benchmark Queue";
+                        document.querySelectorAll('#queue-section h4')[1].innerText = "Prompt Settings";
+                        startBtn.innerText = "🚀 Start Batch Benchmark";
+                        document.querySelector('#progress-section h4').innerText = "⏳ 3. Benchmark Progress";
+                        document.getElementById('status-text').innerText = "Ready...";
+                        document.getElementById('scan-overlay-text').innerText = "Scanning PC...";
+                        document.querySelector('#cors-error-msg h4').innerText = "🚨 Local Model Scan Failed (CORS Error)";
                     }
                     
                     sendMessageToStreamlitClient("streamlit:componentReady", {apiVersion: 1});

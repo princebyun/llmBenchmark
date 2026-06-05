@@ -1,24 +1,28 @@
 import streamlit as st
 from services.hardware_info import GPU_VRAM_MAP, recommend_models
+from locales import get_text
+
+def t(key):
+    return get_text(st.session_state.lang, key)
 
 def render():
-    st.subheader("⚙️ 진단 환경 설정")
-    st.markdown("벤치마크를 수행하기 전, 내 PC 사양과 대상 기기의 IP, 테스트할 모델을 설정합니다.")
+    st.subheader(t("hw_title"))
+    st.markdown(t("hw_desc"))
     
     # 1. 하드웨어 사양 자가 입력
-    st.markdown("#### 1. 내 PC 사양 입력 (선택)")
-    st.markdown("사용 중인 그래픽카드(GPU)를 선택하세요")
-    gpu_choice = st.selectbox("사용 중인 그래픽카드(GPU)를 선택하세요", list(GPU_VRAM_MAP.keys()), label_visibility="collapsed")
+    st.markdown(t("hw_input_title"))
+    st.markdown(t("hw_input_desc"))
+    gpu_choice = st.selectbox(t("hw_input_desc"), list(GPU_VRAM_MAP.keys()), label_visibility="collapsed")
     vram_val = GPU_VRAM_MAP[gpu_choice]
     
     if vram_val > 0:
-        st.info(f"선택한 GPU의 VRAM은 **{vram_val}GB** 입니다.")
+        st.info(t("hw_vram_info").format(vram=vram_val))
         recommended = recommend_models(vram_val)
-        st.success(f"**추천 최대 구동 가능 모델:** {', '.join(recommended)}")
+        st.success(t("hw_recommended").format(models=', '.join(recommended)))
     elif vram_val == 0:
-        st.warning("GPU가 없어 CPU로 구동해야 합니다. 3B 이하 초소형 모델만 추천합니다.")
+        st.warning(t("hw_cpu_warning"))
         
-    with st.expander("💡 벤치마크 필수 설정 (브라우저 CORS 허용 방법)"):
+    with st.expander("💡 벤치마크 필수 설정 (브라우저 CORS 허용 방법)" if st.session_state.lang == "ko" else "💡 Benchmark Prerequisite (Browser CORS Policy)"):
         st.markdown("""
         본 벤치마크는 오라클 서버가 아닌 **사용자님의 웹 브라우저가 직접 로컬 PC와 통신**합니다.
         따라서 방화벽 포트포워딩은 필요 없지만, 브라우저 보안 정책상 **CORS(교차 출처 리소스 공유)**를 허용해야 합니다.
@@ -29,4 +33,16 @@ def render():
         
         **2. LM Studio의 경우:**
         - 개발자 옵션(Local Server 탭)에서 `Cross-Origin-Resource-Sharing (CORS)` 활성화
+        """ if st.session_state.lang == "ko" else """
+        This benchmark relies on **your web browser communicating directly with your local PC**, not the Oracle server.
+        Therefore, firewall port forwarding is not required, but you must allow **CORS (Cross-Origin Resource Sharing)** due to browser security policies.
+        
+        **1. For Ollama:**
+        - **Windows:** Edit System Environment Variables, add `OLLAMA_ORIGINS` with value `*`, then restart Ollama.
+        - **Mac/Linux:** In terminal, run `export OLLAMA_ORIGINS="*"` and then `ollama serve`.
+        
+        **2. For LM Studio:**
+        - Enable `Cross-Origin-Resource-Sharing (CORS)` toggle in Developer Options (Local Server tab).
         """)
+        
+        
