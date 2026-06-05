@@ -144,6 +144,6 @@ elif selected_index == 6:
 st.markdown("""
     <hr style='margin-top: 50px; margin-bottom: 20px; border: 0; border-top: 1px solid #e0e0e0;'>
     <div style='text-align: center; color: #888888; font-size: 13px; font-family: sans-serif;'>
-        Copyright ⓒ 2026 Princebyun. All rights reserved.
+        Copyright ⓒ 2026 princebyun.com. All rights reserved.
     </div>
 """, unsafe_allow_html=True)
