@@ -21,7 +21,7 @@ def render():
             st.markdown("<br>", unsafe_allow_html=True)
             st.markdown(post['content'])
             st.markdown("<br>", unsafe_allow_html=True)
-            caption_text = "작성자: Princebyun | 저작권 ⓒ 2026. All rights reserved." if st.session_state.lang == "ko" else "Author: Princebyun | Copyright ⓒ 2026. All rights reserved."
+            caption_text = "작성자: princebyun | 저작권 ⓒ 2026. All rights reserved." if st.session_state.lang == "ko" else "Author: princebyun | Copyright ⓒ 2026. All rights reserved."
             st.caption(caption_text)
             
     st.divider()
