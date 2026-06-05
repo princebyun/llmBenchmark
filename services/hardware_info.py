@@ -82,14 +82,16 @@ GPU_VRAM_MAP = {
 def recommend_models(vram_gb: float) -> list:
     """VRAM 용량에 따라 구동 가능한 최대 모델 체급을 추천합니다. (4-bit 양자화 기준: 파라미터 * 0.7 + 1GB)"""
     if vram_gb < 4:
-        return ["TinyLlama 1.1B", "Gemma 2B"]
+        return ["TinyLlama 1.1B", "Gemma 2 2B", "Phi-3 Mini (3.8B)"]
     elif vram_gb < 8:
-        return ["Phi-3 Mini (3.8B)", "Qwen 2 7B", "Llama 3 8B"]
+        return ["Gemma 4 E-series", "Llama 3 8B", "Qwen 2 7B"]
     elif vram_gb < 16:
-        return ["Llama 3 8B", "Gemma 2 9B", "Mistral NeMo 12B", "Qwen 3.7 (14B)"]
+        return ["Gemma 2 9B", "Upstage Solar Pro", "Mistral NeMo 12B", "Qwen 3.7 (14B)"]
     elif vram_gb < 24:
-        return ["Qwen 3.7 (14B)", "Gemma 2 27B", "Yi 34B"]
+        return ["Gemma 2 27B", "Command R (35B)", "Qwen 3.7 (30B MoE)"]
     elif vram_gb < 48:
-        return ["Gemma 2 27B", "Llama 3 70B", "Qwen 2 72B"]
+        return ["Llama 3 70B", "Qwen 2 72B", "Mixtral 8x7B"]
+    elif vram_gb < 80:
+        return ["Llama 4 Scout (109B)", "Command R+ (104B)", "DBRX (132B)"]
     else:
-        return ["Llama 3 70B", "Command R+", "Llama 4 Scout (109B)"]
+        return ["Llama 4 Maverick (400B)", "DeepSeek V2 (236B)", "Qwen 3.7 (235B)"]
