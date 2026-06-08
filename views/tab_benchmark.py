@@ -10,6 +10,42 @@ from locales import get_text
 def t(key):
     return get_text(st.session_state.lang, key)
 
+def evaluate_quality(prompt_category, response_text):
+    if not response_text:
+        return 0, 0, 0
+    accuracy = 0
+    quality = 0
+    completeness = 0
+    response_lower = response_text.lower()
+    
+    # 1. Accuracy (50 pts)
+    if "수학" in prompt_category or "Math" in prompt_category or "추론" in prompt_category or "Logic" in prompt_category:
+        if any(c.isdigit() for c in response_text):
+            accuracy = 50
+    elif "코딩" in prompt_category or "Coding" in prompt_category:
+        if "def " in response_text or "function" in response_lower or "class " in response_text or "```" in response_text:
+            accuracy = 50
+    else:
+        if len(response_text) > 20:
+            accuracy = 50
+            
+    # 2. Quality (30 pts)
+    words = len(response_text.split())
+    if 10 <= words <= 500:
+        quality += 20
+    if "```" in response_text or "1." in response_text or "-" in response_text:
+        quality += 10
+        
+    # 3. Completeness (20 pts)
+    if response_text.strip().endswith((".", "!", "?", "요", "다", "함", "음")):
+        completeness += 10
+    
+    refusals = ["as an ai", "i cannot", "죄송합니다", "할 수 없습니다", "i'm sorry", "언어 모델로서"]
+    if not any(r in response_lower for r in refusals):
+        completeness += 10
+        
+    return accuracy, quality, completeness
+
 def render():
     st.subheader(t("bench_title"))
     
@@ -43,6 +79,33 @@ def render():
         **3. For vLLM / oMLX:**
         - Add the `--cors-allowed-origins "*"` flag to your server start command in the terminal.
         """)
+        
+    st.markdown("---")
+    st.subheader("⚙️ 벤치마크 순위 가중치 설정")
+    
+    bench_mode = st.radio("순위 산출 방식 선택", ["기본 모드 (자동 가중치 적용)", "종합 랭킹 모드 (가중치 직접 조절)"], index=0, horizontal=True)
+    
+    weight_quality = 70
+    weight_speed = 30
+    
+    if bench_mode == "종합 랭킹 모드 (가중치 직접 조절)":
+        weight_quality = st.slider("🎯 품질(Score) 가중치 % (나머지는 속도 가중치)", min_value=0, max_value=100, value=70, step=10)
+        weight_speed = 100 - weight_quality
+        
+        with st.expander("💡 가중치 조절 가이드 (품질 vs 속도)"):
+            st.markdown("""
+            **1. 품질(Score) 위주 (예: 품질 90% / 속도 10%)**
+            - **장점:** 똑똑하고 논리적인 답변을 하는 모델이 1위를 차지합니다. 챗봇, 블로그 글쓰기, 기획 등 문장력이 중요할 때 추천합니다.
+            - **단점:** 속도가 느려도 점수만 높으면 상위권에 랭크되므로, 실시간 대화 시 답답할 수 있습니다.
+            
+            **2. 속도(Speed) 위주 (예: 품질 10% / 속도 90%)**
+            - **장점:** 응답이 즉각적이고 쾌적한 모델이 1위를 차지합니다. 코드 자동완성, 실시간 번역, 단순 요약 등 속도가 생명인 작업에 추천합니다.
+            - **단점:** 가끔 오답을 말하거나 문맥을 놓치는 등 퀄리티가 떨어지는 모델이 랭크될 수 있습니다.
+            
+            **3. 가장 정확하고 공정한 테스트 방법 (기본값: 품질 70% / 속도 30%)**
+            - 최신 오픈소스 LLM 생태계에서는 모델 크기에 비해 '응답 품질'이 뛰어난 모델이 가장 가치가 높습니다. 
+            - 속도는 하드웨어(PC 스펙)를 올리면 해결되지만, 모델 자체의 지능은 하드웨어로 커버할 수 없기 때문에 **품질에 더 높은 가중치(70%)를 부여**하는 것이 학술적/실무적으로 가장 객관적입니다.
+            """)
         
     # 설정 언어에 따라 프롬프트 템플릿 가져오기
     prompts, multiturn_scenario = get_prompts(st.session_state.lang)
@@ -94,8 +157,13 @@ def render():
             target_tps = get_baseline_tps(model_info)
             save_benchmark_history(model_info, prompt_category, res, target_tps)
             
+            # 품질 평가 수행
+            acc, qual, comp = evaluate_quality(prompt_category, res.get("response", ""))
+            total_quality_score = acc + qual + comp
+            
             summary_item = {
                 t("col_model"): model_info["name"],
+                "품질 점수": total_quality_score,
                 t("col_load"): round(res.get("load_time", 0) or 0, 2),
                 t("col_prompt_tps"): round(res.get("prompt_tps", 0) or 0, 1),
                 t("col_ttft"): round(res.get("ttft", 0), 2),
@@ -122,6 +190,17 @@ def render():
             
         # 테이블 표시 (턴별 결과 제외)
         display_df = pd.DataFrame([{k: v for k, v in r.items() if k != "턴별 결과"} for r in successful_results])
+        
+        # 종합 점수 계산 (가중치 적용)
+        max_tps = display_df[t("col_client_tps")].max() if len(display_df) > 0 else 1
+        if max_tps == 0: max_tps = 1
+        
+        display_df["종합 점수"] = (display_df["품질 점수"] * (weight_quality / 100)) + ((display_df[t("col_client_tps")] / max_tps * 100) * (weight_speed / 100))
+        display_df["종합 점수"] = display_df["종합 점수"].round(1)
+        
+        # 종합 점수 순으로 정렬
+        display_df = display_df.sort_values(by="종합 점수", ascending=False)
+        
         st.dataframe(display_df, use_container_width=True, hide_index=True)
         
         # 상세 차트
