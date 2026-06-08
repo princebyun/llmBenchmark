@@ -28,7 +28,7 @@ def patch_streamlit_index():
     <meta property="og:type" content="website" />
     <meta property="og:title" content="로컬 LLM 하드웨어 벤치마크 & 진단" />
     <meta property="og:description" content="내 PC의 하드웨어 사양을 진단하고 로컬 LLM(Ollama, LM Studio 등)의 구동 성능(TPS)을 글로벌 리더보드와 비교해 보는 하드웨어 벤치마크 툴입니다." />
-    <meta property="og:url" content="http://llmbenchmark.princebyun.com" />
+    <meta property="og:url" content="http://www.llmbenchmark.princebyun.com" />
     <meta property="og:image" content="https://streamlit.io/images/brand/streamlit-mark-color.png" />
     """
 
