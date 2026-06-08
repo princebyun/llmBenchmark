@@ -624,10 +624,13 @@
             
             // 에러가 없었을 때만 성공 메시지 표시
             if (!hasError) {
-                statusText.innerText = props.config.lang === "en" ? `✅ All benchmarks completed! Sending results...` : `✅ 모든 벤치마크 완료! 결과를 전송합니다...`;
-                logBox.innerText = props.config.lang === "en" ? "Sending results to Python." : "Python으로 결과를 보내고 있습니다.";
+                statusText.innerText = props.config.lang === "en" ? `✅ All benchmarks completed!` : `✅ 모든 벤치마크 완료!`;
+                logBox.innerText = props.config.lang === "en" ? "Test successfully completed. Please check the results below." : "테스트가 성공적으로 완료되었습니다. 아래에서 결과를 확인하세요.";
             } else {
                 statusText.innerText = props.config.lang === "en" ? `⚠️ Completed with some errors.` : `⚠️ 일부 에러와 함께 벤치마크가 종료되었습니다.`;
+                if (finalResults.length === 0) {
+                    logBox.innerText += props.config.lang === "en" ? "\n[Info] All tests failed. No results to display." : "\n[알림] 모든 테스트가 실패하여 표시할 결과가 없습니다.";
+                }
             }
             
             // 버튼 다시 활성화 (재실행 가능하도록)

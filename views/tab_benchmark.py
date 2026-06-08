@@ -35,10 +35,10 @@ def render():
         key=f"benchmark_main_{st.session_state.lang}"
     )
     
-    # 결과 수신 후 시각화
     if result_payload and "results" in result_payload:
         results = result_payload["results"]
         if not results:
+            st.error(t("bench_all_failed") if "bench_all_failed" in st.session_state else "⚠️ 모든 모델의 벤치마크 테스트가 실패했습니다. 에러 로그를 확인해주세요.")
             return
             
         st.markdown("---")
