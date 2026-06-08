@@ -57,7 +57,9 @@ def toggle_lang():
 # 불필요한 기본 UI 요소 숨기기 및 반응형 최대 너비(900px) 설정
 st.markdown("""
     <style>
-        /* 기본 UI 숨김 제거 (사이드바 버튼 노출을 위해 네이티브 상태 유지) */
+        /* 우측 상단 Deploy 버튼과 햄버거 메뉴만 명확히 타겟팅하여 숨김 (좌측 사이드바 버튼은 유지) */
+        .stAppDeployButton, [data-testid="stAppDeployButton"], .stDeployButton { display: none !important; }
+        button[aria-label="Main menu"], #MainMenu { display: none !important; }
         .block-container {
             max-width: 900px !important;
             padding-top: 2rem !important;
