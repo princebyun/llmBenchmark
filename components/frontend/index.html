@@ -594,6 +594,7 @@
             
             progressBar.classList.add("animated");
             
+            let hasError = false;
             for (let i = 0; i < queue.length; i++) {
                 const qName = queue[i];
                 const mInfo = modelOptionsMap[qName];
@@ -612,15 +613,27 @@
                         result: res
                     });
                 } else {
+                    hasError = true;
                     const failMsg = props.config.lang === "en" ? "Failed" : "실패";
-                    logBox.innerText = `\n[${failMsg}] ${mInfo.name}: ${res.error}\n`;
+                    logBox.innerText += `\n[${failMsg}] ${mInfo.name}: ${res.error}\n`;
                 }
                 progressBar.style.width = `${((i+1) / queue.length) * 100}%`;
             }
             
             progressBar.classList.remove("animated");
-            statusText.innerText = props.config.lang === "en" ? `✅ All benchmarks completed! Sending results...` : `✅ 모든 벤치마크 완료! 결과를 전송합니다...`;
-            logBox.innerText = props.config.lang === "en" ? "Sending results to Python." : "Python으로 결과를 보내고 있습니다.";
+            
+            // 에러가 없었을 때만 성공 메시지 표시
+            if (!hasError) {
+                statusText.innerText = props.config.lang === "en" ? `✅ All benchmarks completed! Sending results...` : `✅ 모든 벤치마크 완료! 결과를 전송합니다...`;
+                logBox.innerText = props.config.lang === "en" ? "Sending results to Python." : "Python으로 결과를 보내고 있습니다.";
+            } else {
+                statusText.innerText = props.config.lang === "en" ? `⚠️ Completed with some errors.` : `⚠️ 일부 에러와 함께 벤치마크가 종료되었습니다.`;
+            }
+            
+            // 버튼 다시 활성화 (재실행 가능하도록)
+            scanBtn.disabled = false;
+            addQueueBtn.disabled = false;
+            startBtn.disabled = false;
             
             // Send final payload to Python
             sendDataToPython({ results: finalResults });
