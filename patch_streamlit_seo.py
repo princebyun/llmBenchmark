@@ -21,7 +21,7 @@ def patch_streamlit_index():
 
     # 삽입할 SEO 메타 태그
     seo_tags = """
-    <title>LLM 하드웨어 벤치마크</title>
+    <title>로컬 LLM 하드웨어 벤치마크</title>
     <meta name="description" content="내 PC의 하드웨어 사양을 진단하고 로컬 LLM(Ollama, LM Studio 등)의 구동 성능(TPS)을 글로벌 리더보드와 비교해 보는 하드웨어 벤치마크 툴입니다." />
     
     <!-- Open Graph (KakaoTalk, Facebook 등 공유용) -->
