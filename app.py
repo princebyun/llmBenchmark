@@ -59,8 +59,8 @@ st.markdown("""
     <style>
         .stDeployButton {display:none;}
         [data-testid="stAppDeployButton"] {display:none !important;}
-        [data-testid="stHeader"] {display:none !important;}
         [data-testid="stToolbar"] {display:none !important;}
+        [data-testid="stHeader"] {background-color: transparent !important;}
         .block-container {
             max-width: 900px !important;
             padding-top: 2rem !important;
