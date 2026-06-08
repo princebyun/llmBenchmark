@@ -81,9 +81,9 @@ st.title(t("app_title"))
 st.markdown(t("app_desc"))
 
 with st.sidebar:
-    st.markdown(f"<h2 style='text-align: center; color: #4F46E5; font-weight: 800; font-size: 26px;'>{t('sidebar_title')}</h2>", unsafe_allow_html=True)
-    st.markdown(f"<p style='text-align: center; color: #666; font-size: 13px; margin-top: -10px;'>{t('sidebar_desc')}</p>", unsafe_allow_html=True)
-    st.markdown("<hr style='margin: 10px 0px 20px 0px;'>", unsafe_allow_html=True)
+    st.markdown(f"<h2 style='text-align: center; color: #4F46E5; font-weight: 800; font-size: 24px; margin-bottom: 0px; padding-bottom: 0px;'>{t('sidebar_title')}</h2>", unsafe_allow_html=True)
+    st.markdown(f"<p style='text-align: center; color: #666; font-size: 12px; margin-top: 5px;'>{t('sidebar_desc')}</p>", unsafe_allow_html=True)
+    st.markdown("<hr style='margin: 5px 0px 10px 0px;'>", unsafe_allow_html=True)
     
     options_list = [
         t("menu_benchmark"), 
@@ -118,8 +118,8 @@ with st.sidebar:
         key=f"menu_{st.session_state.lang}",
         styles={
             "container": {"padding": "0!important", "background-color": "transparent"},
-            "icon": {"color": "#4F46E5", "font-size": "18px"}, 
-            "nav-link": {"font-size": "15px", "text-align": "left", "margin":"5px 0px", "--hover-color": "#F1F5F9", "font-weight": "600"},
+            "icon": {"color": "#4F46E5", "font-size": "16px"}, 
+            "nav-link": {"font-size": "14px", "text-align": "left", "margin":"2px 0px", "padding": "8px 10px", "--hover-color": "#F1F5F9", "font-weight": "600"},
             "nav-link-selected": {"background-color": "#4F46E5", "color": "white", "font-weight": "700"},
         }
     )
@@ -128,7 +128,7 @@ with st.sidebar:
         st.session_state.menu_index = options_list.index(menu_choice)
         
     st.markdown("""
-        <div style='margin-top: 40px; text-align: center; color: #6B7280; font-size: 12px; padding: 12px; background-color: #F8F9FA; border-radius: 8px; border: 1px solid #E5E7EB;'>
+        <div style='margin-top: 20px; text-align: center; color: #6B7280; font-size: 11px; padding: 10px; background-color: #F8F9FA; border-radius: 8px; border: 1px solid #E5E7EB;'>
             웹페이지에 수정사항이나 요청사항은<br>
             <a href='mailto:princebyun@gmail.com' style='color: #4F46E5; font-weight: bold; text-decoration: none;'>princebyun@gmail.com</a><br>
             으로 연락주세요.
