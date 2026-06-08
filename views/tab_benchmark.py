@@ -26,6 +26,9 @@ def render():
         
         **2. LM Studio의 경우:**
         - 개발자 옵션(Local Server 탭)에서 `Cross-Origin-Resource-Sharing (CORS)` 활성화
+        
+        **3. vLLM / oMLX의 경우:**
+        - 서버 실행 명령어 뒤에 `--cors-allowed-origins "*"` 옵션을 추가하여 터미널에서 구동
         """ if st.session_state.lang == "ko" else """
         This benchmark relies on **your web browser communicating directly with your local PC**, not the Oracle server.
         Therefore, firewall port forwarding is not required, but you must allow **CORS (Cross-Origin Resource Sharing)** due to browser security policies.
@@ -36,6 +39,9 @@ def render():
         
         **2. For LM Studio:**
         - Enable `Cross-Origin-Resource-Sharing (CORS)` toggle in Developer Options (Local Server tab).
+        
+        **3. For vLLM / oMLX:**
+        - Add the `--cors-allowed-origins "*"` flag to your server start command in the terminal.
         """)
         
     # 설정 언어에 따라 프롬프트 템플릿 가져오기
