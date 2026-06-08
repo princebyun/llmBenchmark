@@ -40,6 +40,8 @@ def render():
                 "서버 TPS": t("col_server_tps_hist"),
                 "클라이언트 TPS": t("col_client_tps_hist"),
                 "달성률 (%)": t("col_achieve_hist"),
+                "품질 점수": t("col_quality_score"),
+                "평가 상세": t("col_eval_detail"),
                 "TPS": "TPS"
             }
             # 데이터프레임에 존재하는 컬럼만 변경

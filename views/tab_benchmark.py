@@ -213,8 +213,8 @@ def render():
             
             summary_item = {
                 t("col_model"): model_info["name"],
-                "품질 점수": total_quality_score,
-                "평가 상세": f"정확도/문맥: {acc} | 형식: {qual} | 완성도: {comp}",
+                t("col_quality_score"): total_quality_score,
+                t("col_eval_detail"): f"{t('eval_acc')}: {acc} | {t('eval_qual')}: {qual} | {t('eval_comp')}: {comp}",
                 t("col_load"): round(res.get("load_time", 0) or 0, 2),
                 t("col_prompt_tps"): round(res.get("prompt_tps", 0) or 0, 1),
                 t("col_ttft"): round(res.get("ttft", 0), 2),
@@ -242,23 +242,17 @@ def render():
         # 테이블 표시 (턴별 결과 제외)
         display_df = pd.DataFrame([{k: v for k, v in r.items() if k != "턴별 결과"} for r in successful_results])
         
-        # 종합 점수 계산 (가중치 적용)
-        max_tps = display_df[t("col_client_tps")].max() if len(display_df) > 0 else 1
-        if max_tps == 0: max_tps = 1
-        
-        display_df["종합 점수"] = (display_df["품질 점수"] * (weight_quality / 100)) + ((display_df[t("col_client_tps")] / max_tps * 100) * (weight_speed / 100))
-        display_df["종합 점수"] = display_df["종합 점수"].round(1)
+        # 총 종합점수 계산 (가중치 적용 - 하드웨어 달성률 절대값 기준)
+        display_df[t("col_total_score")] = (display_df[t("col_quality_score")] * (weight_quality / 100)) + (display_df[t("col_achieve")] * (weight_speed / 100))
+        display_df[t("col_total_score")] = display_df[t("col_total_score")].round(1)
         
         # 종합 점수 순으로 정렬
-        display_df = display_df.sort_values(by="종합 점수", ascending=False)
+        display_df = display_df.sort_values(by=t("col_total_score"), ascending=False)
         
         st.dataframe(display_df, use_container_width=True, hide_index=True)
         
-        st.info(f"""
-        ℹ️ **종합 점수 산출 공식:** `(품질 점수 × {weight_quality}%) + (비교군 내 최고 속도 대비 비율(%) × {weight_speed}%)`
-        
-        *종합 점수는 각 모델의 절대적인 '하드웨어 달성률'을 보는 것이 아니라, **현재 표에 있는 모델들 중 상대적으로 얼마나 빠른지(클라이언트 TPS 비례)**를 계산하여 반영합니다.*
-        """)
+        info_text = t("score_formula_info").format(quality=weight_quality, speed=weight_speed)
+        st.info(info_text)
         
         # 상세 차트
         for r in successful_results:
@@ -286,3 +280,7 @@ def render():
                     # 여기서는 우선 영문키/다국어키 맵핑이 복잡하므로 r 그대로 넘김 (추가 수정 필요할 수도 있음)
                     fig_radar = draw_radar_chart(r, lang=st.session_state.lang)
                     st.plotly_chart(fig_radar, use_container_width=True)
+                    
+        # 렌더링이 완전히 끝난 후 성공 메시지 표시
+        success_msg = "✅ All benchmark evaluations and UI rendering completed. Please check the results." if st.session_state.lang == "en" else "✅ 모든 벤치마크 평가 및 UI 렌더링이 완료되었습니다. 결과를 확인하세요."
+        st.success(success_msg)
