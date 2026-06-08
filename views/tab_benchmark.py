@@ -44,12 +44,22 @@ def render():
         st.markdown("---")
         st.subheader(t("bench_summary_title"))
         
-        results_summary = []
+        successful_results = []
+        failed_results = []
         
         for item in results:
             model_info = item["modelInfo"]
             prompt_category = item["promptCategory"]
             res = item["result"]
+            
+            # 실패한 결과 분리
+            if res.get("success") is False:
+                failed_results.append({
+                    "model_name": model_info["name"],
+                    "error": res.get("error", "알 수 없는 에러 발생")
+                })
+                continue
+                
             is_multiturn = ("멀티턴" in prompt_category or "Multi-turn" in prompt_category)
             
             target_tps = get_baseline_tps(model_info)
@@ -68,14 +78,25 @@ def render():
             if is_multiturn:
                 summary_item["턴별 결과"] = res["turns"]
                 
-            results_summary.append(summary_item)
+            successful_results.append(summary_item)
+            
+        # 1. 실패한 모델 에러 표시
+        if failed_results:
+            st.error("⚠️ 다음 모델들은 벤치마크 진행 중 에러가 발생하여 제외되었습니다.")
+            for fail in failed_results:
+                st.markdown(f"- **{fail['model_name']}**: `{fail['error']}`")
+            st.markdown("---")
+
+        # 2. 성공한 모델 데이터 표시
+        if not successful_results:
+            return
             
         # 테이블 표시 (턴별 결과 제외)
-        display_df = pd.DataFrame([{k: v for k, v in r.items() if k != "턴별 결과"} for r in results_summary])
+        display_df = pd.DataFrame([{k: v for k, v in r.items() if k != "턴별 결과"} for r in successful_results])
         st.dataframe(display_df, use_container_width=True, hide_index=True)
         
         # 상세 차트
-        for r in results_summary:
+        for r in successful_results:
             if "턴별 결과" in r:
                 st.markdown(t("multiturn_detail").format(model=r[t("col_model")]))
                 colA, colB = st.columns([1, 1])

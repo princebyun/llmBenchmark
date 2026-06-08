@@ -614,6 +614,11 @@
                     });
                 } else {
                     hasError = true;
+                    finalResults.push({
+                        modelInfo: mInfo,
+                        promptCategory: promptCategory,
+                        result: { success: false, error: res.error }
+                    });
                     const failMsg = props.config.lang === "en" ? "Failed" : "실패";
                     logBox.innerText += `\n[${failMsg}] ${mInfo.name}: ${res.error}\n`;
                 }
