@@ -57,9 +57,7 @@ def toggle_lang():
 # 불필요한 기본 UI 요소 숨기기 및 반응형 최대 너비(900px) 설정
 st.markdown("""
     <style>
-        .stDeployButton {display:none;}
-        [data-testid="stAppDeployButton"] {display:none !important;}
-        [data-testid="stToolbar"] {display:none !important;}
+        /* 기본 UI 숨김 제거 (사이드바 버튼 노출을 위해 네이티브 상태 유지) */
         .block-container {
             max-width: 900px !important;
             padding-top: 2rem !important;
