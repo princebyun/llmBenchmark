@@ -16,6 +16,9 @@ locales = {
         "menu_wiki": "모델 사전",
         "menu_methodology": "측정 방법론",
         "menu_blog": "가이드 & 블로그",
+        "menu_about": "서비스 소개",
+        "menu_privacy": "개인정보처리방침",
+        "menu_contact": "문의하기",
         
         # tab_benchmark.py
         "bench_title": "🚀 로컬 기기 벤치마크 (Client-Side)",
@@ -140,7 +143,19 @@ locales = {
         "blog_article2_title": "### 🧠 양자화(Quantization)란 무엇인가?",
         "blog_article2_desc": "16비트(FP16) 모델을 4비트(INT4)로 압축하면 성능 저하 없이 VRAM 사용량을 1/3로 줄일 수 있습니다...",
         "blog_article3_title": "### ⚡ vLLM을 활용한 추론 속도 극대화",
-        "blog_article3_desc": "PageAttention 기술을 활용해 서버 환경에서 수십 명의 요청을 동시에 처리하는 vLLM의 구조를 파헤칩니다..."
+        "blog_article3_desc": "PageAttention 기술을 활용해 서버 환경에서 수십 명의 요청을 동시에 처리하는 vLLM의 구조를 파헤칩니다...",
+        
+        # tab_about.py, tab_privacy.py, tab_contact.py
+        "about_title": "💡 서비스 소개 (About)",
+        "about_content": "본 LLM 하드웨어 벤치마크 툴은 사용자 기기의 실질적인 로컬 AI 구동 성능을 진단하기 위해 개발되었습니다.\n\n개인 PC(Edge Device)에서 구동되는 오픈소스 LLM의 중요성이 대두됨에 따라, 복잡한 파이썬 스크립트 작성 없이도 **브라우저 클릭 한 번으로 내 PC의 추론 성능(TPS)을 객관적으로 측정**할 수 있는 도구를 제공하고자 합니다.",
+        
+        "privacy_title": "🔒 개인정보처리방침 (Privacy Policy)",
+        "privacy_content_1": "### 1. 데이터 처리 원칙\n본 서비스는 **Client-Side 기반 벤치마크**로 설계되었습니다. 귀하가 로컬 LLM에 입력하는 **프롬프트 내용과 생성된 모든 결과물은 외부(당사 서버 포함)로 전송되지 않습니다.**\n모든 추론 작업은 귀하의 브라우저(localhost)와 로컬 통신 포트(예: 11434, 1234) 간에 직접 이루어집니다.",
+        "privacy_content_2": "### 2. 수집하는 정보\n본 서비스는 방문자의 통계적 분석(트래픽, 체류 시간 등)을 위해 **구글 애널리틱스(Google Analytics)** 등 익명화된 트래커를 사용하고 있습니다. 개인을 특정할 수 있는 이름, 이메일, IP 주소 등의 민감한 개인정보는 일절 수집하지 않습니다.",
+        "privacy_content_3": "### 3. 정보의 보관 및 이용\n벤치마크 이력 데이터는 브라우저 세션(임시 메모리)에만 일시적으로 보관되며, 페이지를 닫거나 새로고침하면 영구적으로 소멸됩니다.",
+        
+        "contact_title": "📧 문의하기 (Contact)",
+        "contact_content": "서비스에 대한 피드백, 버그 리포트, 또는 기타 협업 문의가 있으시다면 아래의 연락처로 이메일을 남겨주세요."
     },
     "en": {
         # app.py
@@ -156,6 +171,9 @@ locales = {
         "menu_wiki": "Model Dictionary",
         "menu_methodology": "Methodology",
         "menu_blog": "Guide & Blog",
+        "menu_about": "About",
+        "menu_privacy": "Privacy Policy",
+        "menu_contact": "Contact",
         
         # tab_benchmark.py
         "bench_title": "🚀 Local Device Benchmark (Client-Side)",
@@ -280,6 +298,18 @@ locales = {
         "blog_article2_title": "### 🧠 What is Quantization?",
         "blog_article2_desc": "Compressing a 16-bit (FP16) model to 4-bit (INT4) cuts VRAM usage by 1/3 with minimal performance loss...",
         "blog_article3_title": "### ⚡ Maximizing Inference Speed with vLLM",
-        "blog_article3_desc": "Explore vLLM's architecture, which leverages PageAttention to handle dozens of concurrent requests..."
+        "blog_article3_desc": "Explore vLLM's architecture, which leverages PageAttention to handle dozens of concurrent requests...",
+        
+        # tab_about.py, tab_privacy.py, tab_contact.py
+        "about_title": "💡 About the Service",
+        "about_content": "This LLM Hardware Benchmark tool was developed to diagnose the practical local AI running performance of user devices.\n\nAs the importance of open-source LLMs running on personal PCs (Edge Devices) grows, we aim to provide a tool that allows you to objectively measure your PC's inference performance (TPS) with a single browser click, without needing to write complex Python scripts.",
+        
+        "privacy_title": "🔒 Privacy Policy",
+        "privacy_content_1": "### 1. Data Processing Principles\nThis service is designed as a **Client-Side based benchmark**. **The prompts you input into the local LLM and all generated results are never transmitted to external servers (including our own).**\nAll inference operations are strictly handled directly between your browser (localhost) and your local communication ports (e.g., 11434, 1234).",
+        "privacy_content_2": "### 2. Information Collected\nThis service uses anonymized trackers such as **Google Analytics** for statistical analysis of visitors (traffic, duration of stay, etc.). We do not collect any sensitive personal information that can identify an individual, such as names, emails, or IP addresses.",
+        "privacy_content_3": "### 3. Data Storage and Usage\nBenchmark history data is only temporarily stored in the browser session (temporary memory) and is permanently destroyed when you close or refresh the page.",
+        
+        "contact_title": "📧 Contact",
+        "contact_content": "If you have feedback, bug reports, or other collaboration inquiries about the service, please leave an email at the contact below."
     }
 }

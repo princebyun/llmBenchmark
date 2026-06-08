@@ -1,7 +1,7 @@
 import streamlit as st
 import streamlit.components.v1 as stc
 from streamlit_option_menu import option_menu
-from views import tab_hardware, tab_benchmark, tab_leaderboard, tab_history, tab_model_wiki, tab_methodology, tab_blog
+from views import tab_hardware, tab_benchmark, tab_leaderboard, tab_history, tab_model_wiki, tab_methodology, tab_blog, tab_about, tab_privacy, tab_contact
 from locales import get_text
 
 # ==========================================
@@ -92,7 +92,10 @@ with st.sidebar:
         t("menu_leaderboard"), 
         t("menu_wiki"),
         t("menu_methodology"),
-        t("menu_blog")
+        t("menu_blog"),
+        t("menu_about"),
+        t("menu_privacy"),
+        t("menu_contact")
     ]
     
     menu_choice = option_menu(
@@ -105,7 +108,10 @@ with st.sidebar:
             'trophy', 
             'book-half',
             'calculator',
-            'journal-code'
+            'journal-code',
+            'info-circle',
+            'shield-lock',
+            'envelope'
         ],
         menu_icon="cast",
         default_index=st.session_state.menu_index,
@@ -145,6 +151,12 @@ elif selected_index == 5:
     tab_methodology.render()
 elif selected_index == 6:
     tab_blog.render()
+elif selected_index == 7:
+    tab_about.render()
+elif selected_index == 8:
+    tab_privacy.render()
+elif selected_index == 9:
+    tab_contact.render()
 
 # ==========================================
 # 3. 푸터 (저작권 표시)
