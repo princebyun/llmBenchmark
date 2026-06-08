@@ -341,11 +341,19 @@
 
             logBox.innerText = `[${modelInfo.name}] 연결 중...\n`;
 
+            const controller = new AbortController();
+            const timeoutId = setTimeout(() => {
+                if (firstTokenTime === null) {
+                    controller.abort();
+                }
+            }, 60000); // 60초 대기 후 첫 토큰 없으면 강제 취소
+
             try {
                 const response = await fetch(url, {
                     method: 'POST',
                     body: JSON.stringify(payload),
-                    headers: { 'Content-Type': 'application/json' }
+                    headers: { 'Content-Type': 'application/json' },
+                    signal: controller.signal
                 });
 
                 if (!response.ok) throw new Error("Network response was not ok");
@@ -363,7 +371,10 @@
                     for (const line of lines) {
                         if (!line.trim()) continue;
                         
-                        if (firstTokenTime === null) firstTokenTime = performance.now();
+                        if (firstTokenTime === null) {
+                            firstTokenTime = performance.now();
+                            clearTimeout(timeoutId); // 첫 토큰 받으면 타임아웃 해제
+                        }
                         
                         const data = JSON.parse(line);
                             if (data.message && data.message.content) {
@@ -397,7 +408,13 @@
                     }
                 }
             } catch (e) {
-                result.error = e.toString();
+                if (e.name === 'AbortError') {
+                    result.error = "Timeout (60s): VRAM 초과 또는 서버 무응답 (OOM 의심)";
+                } else {
+                    result.error = e.toString();
+                }
+            } finally {
+                clearTimeout(timeoutId);
             }
             return result;
         }
@@ -420,11 +437,19 @@
 
             logBox.innerText = `[${modelInfo.name}] 연결 중...\n`;
 
+            const controller = new AbortController();
+            const timeoutId = setTimeout(() => {
+                if (firstTokenTime === null) {
+                    controller.abort();
+                }
+            }, 60000); // 60초 대기 후 첫 토큰 없으면 강제 취소
+
             try {
                 const response = await fetch(url, {
                     method: 'POST',
                     body: JSON.stringify(payload),
-                    headers: { 'Content-Type': 'application/json' }
+                    headers: { 'Content-Type': 'application/json' },
+                    signal: controller.signal
                 });
 
                 if (!response.ok) throw new Error("Network response was not ok");
@@ -446,7 +471,10 @@
                         const dataStr = trimmed.substring(6);
                         if (dataStr === "[DONE]") break;
                         
-                        if (firstTokenTime === null) firstTokenTime = performance.now();
+                        if (firstTokenTime === null) {
+                            firstTokenTime = performance.now();
+                            clearTimeout(timeoutId);
+                        }
                         
                         try {
                             const data = JSON.parse(dataStr);
@@ -483,7 +511,13 @@
                 };
                 
             } catch (e) {
-                result.error = e.toString();
+                if (e.name === 'AbortError') {
+                    result.error = "Timeout (60s): VRAM 초과 또는 서버 무응답 (OOM 의심)";
+                } else {
+                    result.error = e.toString();
+                }
+            } finally {
+                clearTimeout(timeoutId);
             }
             return result;
         }
