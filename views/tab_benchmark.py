@@ -198,15 +198,23 @@ def render():
             is_multiturn = ("멀티턴" in prompt_category or "Multi-turn" in prompt_category)
             
             target_tps = get_baseline_tps(model_info)
-            save_benchmark_history(model_info, prompt_category, res, target_tps)
             
             # 품질 평가 수행
             acc, qual, comp = evaluate_quality(prompt_category, res.get("response", ""))
             total_quality_score = acc + qual + comp
             
+            # 히스토리에 기록하기 위해 res에 임시 저장
+            res["acc"] = acc
+            res["qual"] = qual
+            res["comp"] = comp
+            res["total_quality"] = total_quality_score
+            
+            save_benchmark_history(model_info, prompt_category, res, target_tps)
+            
             summary_item = {
                 t("col_model"): model_info["name"],
                 "품질 점수": total_quality_score,
+                "평가 상세": f"정확도/문맥: {acc} | 형식: {qual} | 완성도: {comp}",
                 t("col_load"): round(res.get("load_time", 0) or 0, 2),
                 t("col_prompt_tps"): round(res.get("prompt_tps", 0) or 0, 1),
                 t("col_ttft"): round(res.get("ttft", 0), 2),
@@ -245,6 +253,12 @@ def render():
         display_df = display_df.sort_values(by="종합 점수", ascending=False)
         
         st.dataframe(display_df, use_container_width=True, hide_index=True)
+        
+        st.info(f"""
+        ℹ️ **종합 점수 산출 공식:** `(품질 점수 × {weight_quality}%) + (비교군 내 최고 속도 대비 비율(%) × {weight_speed}%)`
+        
+        *종합 점수는 각 모델의 절대적인 '하드웨어 달성률'을 보는 것이 아니라, **현재 표에 있는 모델들 중 상대적으로 얼마나 빠른지(클라이언트 TPS 비례)**를 계산하여 반영합니다.*
+        """)
         
         # 상세 차트
         for r in successful_results:
