@@ -4,6 +4,7 @@ from config import get_prompts, OLLAMA_PORT, LMSTUDIO_PORT, VLLM_PORT
 from components.client_engine import benchmark_engine
 from services.scoring import get_baseline_tps
 from services.history import save_benchmark_history
+from services.semantic_scoring import compute_semantic_similarity
 from components.charts import draw_gauge_chart, draw_radar_chart, draw_multiturn_line_chart
 from locales import get_text
 
@@ -21,48 +22,50 @@ def evaluate_quality(prompt_category, response_text):
     response_lower = response_text.lower()
     
     # 1. Accuracy (50 pts) - 카테고리별 정밀 검사
-    if "일반 설명" in prompt_category or "General" in prompt_category:
-        # 문단 수(대략적인 줄바꿈 수) 및 예시 포함 여부 검사
-        paras = len([p for p in response_text.split("\n\n") if len(p.strip()) > 10])
-        if paras >= 2: accuracy += 25
-        if "예" in response_text or "example" in response_lower: accuracy += 25
-        
-    elif "코드" in prompt_category or "Code" in prompt_category:
-        # 파이썬 함수, 주석, 미로 배열 검사
-        if "```" in response_text: accuracy += 10
-        if "def " in response_text: accuracy += 15
-        if "#" in response_text: accuracy += 10
-        if "[" in response_text and "]" in response_text: accuracy += 15
-        
-    elif "번역" in prompt_category or "Translation" in prompt_category:
-        # 핵심 영문 단어 포함 여부 검사
-        if "efficiency" in response_lower: accuracy += 20
-        if "security" in response_lower: accuracy += 20
-        if "local" in response_lower: accuracy += 10
-        
-    elif "수학" in prompt_category or "Math" in prompt_category:
-        # 함수 구현 및 시간 복잡도(O(n) 등) 표현 검사
-        if "def " in response_text: accuracy += 10
-        if "o(n)" in response_lower: accuracy += 20
-        if "o(2^n)" in response_lower or "o(1." in response_lower: accuracy += 20
-            
-    elif "요약" in prompt_category or "Summarization" in prompt_category:
-        # 3가지 핵심 내용 넘버링 검사
-        if "1." in response_text and "2." in response_text and "3." in response_text: accuracy += 50
-        elif "1" in response_text and "2" in response_text and "3" in response_text: accuracy += 30
-            
-    elif "짧은 응답" in prompt_category or "Short" in prompt_category:
-        # 정답 정확히 포함 여부
-        if "서울" in response_text or "seoul" in response_lower: accuracy += 50
-            
-    elif "멀티턴" in prompt_category or "Multi-turn" in prompt_category:
-        # 다중 문단 및 물리 관련 키워드 검사
-        paras = len([p for p in response_text.split("\n\n") if len(p.strip()) > 10])
-        if paras >= 2: accuracy += 25
-        if "슬릿" in response_text or "slit" in response_lower or "슈뢰딩거" in response_text or "schrodinger" in response_lower: accuracy += 25
+    
+    # [추가] Sentence-Transformer를 이용한 문맥 유사도 측정 시도
+    # -1이 반환되면 정답지가 없거나 에러인 경우이므로 기존 키워드 매칭으로 Fallback
+    semantic_score = compute_semantic_similarity(prompt_category, response_text)
+    
+    if semantic_score != -1:
+        # 일반 설명, 번역, 요약 등 정답지가 있는 카테고리는 의미론적 유사도 점수를 그대로 사용
+        accuracy = semantic_score
     else:
-        # 알 수 없는 카테고리의 경우 기본 길이 검사
-        if len(response_text) > 30: accuracy += 50
+        # 코딩, 수학, 짧은 응답 등 정답지가 없거나 가변적인 카테고리는 기존 키워드 매칭 사용
+        if "일반 설명" in prompt_category or "General" in prompt_category:
+            paras = len([p for p in response_text.split("\n\n") if len(p.strip()) > 10])
+            if paras >= 2: accuracy += 25
+            if "예" in response_text or "example" in response_lower: accuracy += 25
+            
+        elif "코드" in prompt_category or "Code" in prompt_category:
+            if "```" in response_text: accuracy += 10
+            if "def " in response_text: accuracy += 15
+            if "#" in response_text: accuracy += 10
+            if "[" in response_text and "]" in response_text: accuracy += 15
+            
+        elif "번역" in prompt_category or "Translation" in prompt_category:
+            if "efficiency" in response_lower: accuracy += 20
+            if "security" in response_lower: accuracy += 20
+            if "local" in response_lower: accuracy += 10
+            
+        elif "수학" in prompt_category or "Math" in prompt_category:
+            if "def " in response_text: accuracy += 10
+            if "o(n)" in response_lower: accuracy += 20
+            if "o(2^n)" in response_lower or "o(1." in response_lower: accuracy += 20
+                
+        elif "요약" in prompt_category or "Summarization" in prompt_category:
+            if "1." in response_text and "2." in response_text and "3." in response_text: accuracy += 50
+            elif "1" in response_text and "2" in response_text and "3" in response_text: accuracy += 30
+                
+        elif "짧은 응답" in prompt_category or "Short" in prompt_category:
+            if "서울" in response_text or "seoul" in response_lower: accuracy += 50
+                
+        elif "멀티턴" in prompt_category or "Multi-turn" in prompt_category:
+            paras = len([p for p in response_text.split("\n\n") if len(p.strip()) > 10])
+            if paras >= 2: accuracy += 25
+            if "슬릿" in response_text or "slit" in response_lower or "슈뢰딩거" in response_text or "schrodinger" in response_lower: accuracy += 25
+        else:
+            if len(response_text) > 30: accuracy += 50
         
     # 2. Quality (30 pts)
     # 너무 짧으면 감점 (단답형 제외), 너무 길면 감점
