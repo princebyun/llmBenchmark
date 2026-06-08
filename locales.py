@@ -38,6 +38,25 @@ locales = {
         "eval_qual": "형식",
         "eval_comp": "완성도",
         "score_formula_info": "ℹ️ **총 종합점수 산출 공식:** `(품질 점수 × {quality}%) + (하드웨어 달성률(%) × {speed}%)`\n\n*총 종합점수는 모델의 품질 점수와 기기의 이론적 스펙 대비 실제 달성률을 반영하여 절대적인 지표로 계산됩니다.*",
+        "weight_settings_title": "⚙️ 벤치마크 순위 가중치 설정",
+        "weight_mode_select": "순위 산출 방식 선택",
+        "weight_mode_default": "기본 모드 (자동 가중치 적용)",
+        "weight_mode_custom": "종합 랭킹 모드 (가중치 직접 조절)",
+        "weight_slider_label": "🎯 품질(Score) 가중치 % (나머지는 속도 가중치)",
+        "weight_guide_title": "💡 가중치 조절 가이드 (품질 vs 속도)",
+        "weight_guide_content": """
+        **1. 품질(Score) 위주 (예: 품질 90% / 속도 10%)**
+        - **장점:** 똑똑하고 논리적인 답변을 하는 모델이 1위를 차지합니다. 챗봇, 블로그 글쓰기, 기획 등 문장력이 중요할 때 추천합니다.
+        - **단점:** 속도가 느려도 점수만 높으면 상위권에 랭크되므로, 실시간 대화 시 답답할 수 있습니다.
+        
+        **2. 속도(Speed) 위주 (예: 품질 10% / 속도 90%)**
+        - **장점:** 응답이 즉각적이고 쾌적한 모델이 1위를 차지합니다. 코드 자동완성, 실시간 번역, 단순 요약 등 속도가 생명인 작업에 추천합니다.
+        - **단점:** 가끔 오답을 말하거나 문맥을 놓치는 등 퀄리티가 떨어지는 모델이 랭크될 수 있습니다.
+        
+        **3. 가장 정확하고 공정한 테스트 방법 (기본값: 품질 70% / 속도 30%)**
+        - 최신 오픈소스 LLM 생태계에서는 모델 크기에 비해 '응답 품질'이 뛰어난 모델이 가장 가치가 높습니다. 
+        - 속도는 하드웨어(PC 스펙)를 올리면 해결되지만, 모델 자체의 지능은 하드웨어로 커버할 수 없기 때문에 **품질에 더 높은 가중치(70%)를 부여**하는 것이 학술적/실무적으로 가장 객관적입니다.
+        """,
         "multiturn_detail": "🔄 {model} 멀티턴 상세 분석",
         "single_detail": "🎯 {model} 종합 성능 분석",
         
@@ -200,6 +219,25 @@ locales = {
         "eval_qual": "Format",
         "eval_comp": "Completeness",
         "score_formula_info": "ℹ️ **Total Score Formula:** `(Quality Score × {quality}%) + (Hardware Achievement(%) × {speed}%)`\n\n*The Total Score is calculated as an absolute metric reflecting the model's quality score and the actual achievement rate compared to the device's theoretical specs.*",
+        "weight_settings_title": "⚙️ Benchmark Rank Weight Settings",
+        "weight_mode_select": "Select Rank Calculation Mode",
+        "weight_mode_default": "Default Mode (Auto Weight)",
+        "weight_mode_custom": "Custom Ranking Mode (Adjust Weights)",
+        "weight_slider_label": "🎯 Quality(Score) Weight % (Rest is Speed Weight)",
+        "weight_guide_title": "💡 Weight Adjustment Guide (Quality vs Speed)",
+        "weight_guide_content": """
+        **1. Quality-Focused (e.g., Quality 90% / Speed 10%)**
+        - **Pros:** Models that provide smart and logical answers rank highest. Recommended when writing quality, like chatbots, blog posts, or planning, is crucial.
+        - **Cons:** Even slow models can rank high if their score is good, which might feel sluggish during real-time conversations.
+        
+        **2. Speed-Focused (e.g., Quality 10% / Speed 90%)**
+        - **Pros:** Fast and responsive models rank highest. Recommended for tasks where speed is everything, like code auto-completion, real-time translation, or simple summaries.
+        - **Cons:** Models with lower response quality, such as giving wrong answers or missing context, might rank high.
+        
+        **3. The Most Accurate & Fair Method (Default: Quality 70% / Speed 30%)**
+        - In the modern open-source LLM ecosystem, models with outstanding 'response quality' relative to their size hold the most value.
+        - Speed can be improved by upgrading hardware, but a model's inherent intelligence cannot. Therefore, **giving a higher weight to quality (70%)** is the most objective approach academically and practically.
+        """,
         "multiturn_detail": "🔄 {model} Multi-turn Analysis",
         "single_detail": "🎯 {model} Comprehensive Performance Analysis",
         

@@ -124,31 +124,19 @@ def render():
         """)
         
     st.markdown("---")
-    st.subheader("⚙️ 벤치마크 순위 가중치 설정")
+    st.subheader(t("weight_settings_title"))
     
-    bench_mode = st.radio("순위 산출 방식 선택", ["기본 모드 (자동 가중치 적용)", "종합 랭킹 모드 (가중치 직접 조절)"], index=0, horizontal=True)
+    bench_mode = st.radio(t("weight_mode_select"), [t("weight_mode_default"), t("weight_mode_custom")], index=0, horizontal=True)
     
     weight_quality = 70
     weight_speed = 30
     
-    if bench_mode == "종합 랭킹 모드 (가중치 직접 조절)":
-        weight_quality = st.slider("🎯 품질(Score) 가중치 % (나머지는 속도 가중치)", min_value=0, max_value=100, value=70, step=10)
+    if bench_mode == t("weight_mode_custom"):
+        weight_quality = st.slider(t("weight_slider_label"), min_value=0, max_value=100, value=70, step=10)
         weight_speed = 100 - weight_quality
         
-        with st.expander("💡 가중치 조절 가이드 (품질 vs 속도)"):
-            st.markdown("""
-            **1. 품질(Score) 위주 (예: 품질 90% / 속도 10%)**
-            - **장점:** 똑똑하고 논리적인 답변을 하는 모델이 1위를 차지합니다. 챗봇, 블로그 글쓰기, 기획 등 문장력이 중요할 때 추천합니다.
-            - **단점:** 속도가 느려도 점수만 높으면 상위권에 랭크되므로, 실시간 대화 시 답답할 수 있습니다.
-            
-            **2. 속도(Speed) 위주 (예: 품질 10% / 속도 90%)**
-            - **장점:** 응답이 즉각적이고 쾌적한 모델이 1위를 차지합니다. 코드 자동완성, 실시간 번역, 단순 요약 등 속도가 생명인 작업에 추천합니다.
-            - **단점:** 가끔 오답을 말하거나 문맥을 놓치는 등 퀄리티가 떨어지는 모델이 랭크될 수 있습니다.
-            
-            **3. 가장 정확하고 공정한 테스트 방법 (기본값: 품질 70% / 속도 30%)**
-            - 최신 오픈소스 LLM 생태계에서는 모델 크기에 비해 '응답 품질'이 뛰어난 모델이 가장 가치가 높습니다. 
-            - 속도는 하드웨어(PC 스펙)를 올리면 해결되지만, 모델 자체의 지능은 하드웨어로 커버할 수 없기 때문에 **품질에 더 높은 가중치(70%)를 부여**하는 것이 학술적/실무적으로 가장 객관적입니다.
-            """)
+        with st.expander(t("weight_guide_title")):
+            st.markdown(t("weight_guide_content"))
         
     # 설정 언어에 따라 프롬프트 템플릿 가져오기
     prompts, multiturn_scenario = get_prompts(st.session_state.lang)
