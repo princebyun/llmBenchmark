@@ -120,6 +120,14 @@ with st.sidebar:
 
     if menu_choice in options_list:
         st.session_state.menu_index = options_list.index(menu_choice)
+        
+    st.markdown("""
+        <div style='margin-top: 40px; text-align: center; color: #6B7280; font-size: 12px; padding: 12px; background-color: #F8F9FA; border-radius: 8px; border: 1px solid #E5E7EB;'>
+            웹페이지에 수정사항이나 요청사항은<br>
+            <a href='mailto:princebyun@gmail.com' style='color: #4F46E5; font-weight: bold; text-decoration: none;'>princebyun@gmail.com</a><br>
+            으로 연락주세요.
+        </div>
+    """, unsafe_allow_html=True)
 
 selected_index = st.session_state.menu_index
 
