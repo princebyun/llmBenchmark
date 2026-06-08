@@ -13,34 +13,74 @@ def t(key):
 def evaluate_quality(prompt_category, response_text):
     if not response_text:
         return 0, 0, 0
+        
     accuracy = 0
     quality = 0
     completeness = 0
+    
     response_lower = response_text.lower()
     
-    # 1. Accuracy (50 pts)
-    if "수학" in prompt_category or "Math" in prompt_category or "추론" in prompt_category or "Logic" in prompt_category:
-        if any(c.isdigit() for c in response_text):
-            accuracy = 50
-    elif "코딩" in prompt_category or "Coding" in prompt_category:
-        if "def " in response_text or "function" in response_lower or "class " in response_text or "```" in response_text:
-            accuracy = 50
-    else:
-        if len(response_text) > 20:
-            accuracy = 50
+    # 1. Accuracy (50 pts) - 카테고리별 정밀 검사
+    if "일반 설명" in prompt_category or "General" in prompt_category:
+        # 문단 수(대략적인 줄바꿈 수) 및 예시 포함 여부 검사
+        paras = len([p for p in response_text.split("\n\n") if len(p.strip()) > 10])
+        if paras >= 2: accuracy += 25
+        if "예" in response_text or "example" in response_lower: accuracy += 25
+        
+    elif "코드" in prompt_category or "Code" in prompt_category:
+        # 파이썬 함수, 주석, 미로 배열 검사
+        if "```" in response_text: accuracy += 10
+        if "def " in response_text: accuracy += 15
+        if "#" in response_text: accuracy += 10
+        if "[" in response_text and "]" in response_text: accuracy += 15
+        
+    elif "번역" in prompt_category or "Translation" in prompt_category:
+        # 핵심 영문 단어 포함 여부 검사
+        if "efficiency" in response_lower: accuracy += 20
+        if "security" in response_lower: accuracy += 20
+        if "local" in response_lower: accuracy += 10
+        
+    elif "수학" in prompt_category or "Math" in prompt_category:
+        # 함수 구현 및 시간 복잡도(O(n) 등) 표현 검사
+        if "def " in response_text: accuracy += 10
+        if "o(n)" in response_lower: accuracy += 20
+        if "o(2^n)" in response_lower or "o(1." in response_lower: accuracy += 20
             
+    elif "요약" in prompt_category or "Summarization" in prompt_category:
+        # 3가지 핵심 내용 넘버링 검사
+        if "1." in response_text and "2." in response_text and "3." in response_text: accuracy += 50
+        elif "1" in response_text and "2" in response_text and "3" in response_text: accuracy += 30
+            
+    elif "짧은 응답" in prompt_category or "Short" in prompt_category:
+        # 정답 정확히 포함 여부
+        if "서울" in response_text or "seoul" in response_lower: accuracy += 50
+            
+    elif "멀티턴" in prompt_category or "Multi-turn" in prompt_category:
+        # 다중 문단 및 물리 관련 키워드 검사
+        paras = len([p for p in response_text.split("\n\n") if len(p.strip()) > 10])
+        if paras >= 2: accuracy += 25
+        if "슬릿" in response_text or "slit" in response_lower or "슈뢰딩거" in response_text or "schrodinger" in response_lower: accuracy += 25
+    else:
+        # 알 수 없는 카테고리의 경우 기본 길이 검사
+        if len(response_text) > 30: accuracy += 50
+        
     # 2. Quality (30 pts)
+    # 너무 짧으면 감점 (단답형 제외), 너무 길면 감점
     words = len(response_text.split())
-    if 10 <= words <= 500:
-        quality += 20
-    if "```" in response_text or "1." in response_text or "-" in response_text:
-        quality += 10
+    if "짧은 응답" in prompt_category or "Short" in prompt_category:
+        if words <= 15: quality += 30
+        else: quality += 10
+    else:
+        if words >= 30: quality += 10
+        if words >= 60: quality += 10
+        if words <= 800: quality += 10
         
     # 3. Completeness (20 pts)
-    if response_text.strip().endswith((".", "!", "?", "요", "다", "함", "음")):
+    # 문장 종결 및 회피성 멘트 검사
+    if response_text.strip()[-1] in [".", "!", "?", "요", "다", "함", "음", ">", "`"]:
         completeness += 10
-    
-    refusals = ["as an ai", "i cannot", "죄송합니다", "할 수 없습니다", "i'm sorry", "언어 모델로서"]
+        
+    refusals = ["as an ai", "i cannot", "죄송합니다", "할 수 없습니다", "i'm sorry", "언어 모델로서", "i don't have"]
     if not any(r in response_lower for r in refusals):
         completeness += 10
         
