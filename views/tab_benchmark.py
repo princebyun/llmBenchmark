@@ -177,6 +177,10 @@ def render():
             return
             
         st.markdown("---")
+        
+        success_msg = "✅ All benchmark evaluations and UI rendering completed. Please check the results." if st.session_state.lang == "en" else "✅ 모든 벤치마크 평가 및 UI 렌더링이 완료되었습니다. 결과를 확인하세요."
+        st.success(success_msg)
+        
         st.subheader(t("bench_summary_title"))
         
         successful_results = []
@@ -280,7 +284,3 @@ def render():
                     # 여기서는 우선 영문키/다국어키 맵핑이 복잡하므로 r 그대로 넘김 (추가 수정 필요할 수도 있음)
                     fig_radar = draw_radar_chart(r, lang=st.session_state.lang)
                     st.plotly_chart(fig_radar, use_container_width=True)
-                    
-        # 렌더링이 완전히 끝난 후 성공 메시지 표시
-        success_msg = "✅ All benchmark evaluations and UI rendering completed. Please check the results." if st.session_state.lang == "en" else "✅ 모든 벤치마크 평가 및 UI 렌더링이 완료되었습니다. 결과를 확인하세요."
-        st.success(success_msg)
