@@ -363,7 +363,8 @@
             let fullResponse = "";
             let result = { success: false };
 
-            logBox.innerText = `[${modelInfo.name}] 연결 중...\n`;
+            const connectMsg = props.config.lang === "en" ? "Connecting..." : "연결 중...";
+            logBox.innerText = `[${modelInfo.name}] ${connectMsg}\n`;
 
             const controller = new AbortController();
             const timeoutId = setTimeout(() => {
@@ -477,7 +478,8 @@
             let serverTokenCount = 0;
             let result = { success: false };
 
-            logBox.innerText = `[${modelInfo.name}] 연결 중...\n`;
+            const connectMsg = props.config.lang === "en" ? "Connecting..." : "연결 중...";
+            logBox.innerText = `[${modelInfo.name}] ${connectMsg}\n`;
 
             const controller = new AbortController();
             const timeoutId = setTimeout(() => {
@@ -580,7 +582,8 @@
                 let firstTtft = 0;
                 
                 for (let i = 0; i < turnPrompts.length; i++) {
-                    statusText.innerText = `[${modelInfo.name}] 멀티턴 ${i+1}/3 턴 생성 중...`;
+                    const statusMsg = props.config.lang === "en" ? `[${modelInfo.name}] Generating multi-turn ${i+1}/3 ...` : `[${modelInfo.name}] 멀티턴 ${i+1}/3 턴 생성 중...`;
+                    statusText.innerText = statusMsg;
                     accumulatedPrompt += `User: ${turnPrompts[i]}\nAssistant:`;
                     
                     let res;
