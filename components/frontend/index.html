@@ -449,7 +449,7 @@
                 }
             } catch (e) {
                 if (e.name === 'AbortError') {
-                    result.error = "Timeout (60s): VRAM 초과 또는 서버 무응답 (OOM 의심)";
+                    result.error = props.config.lang === "en" ? "Timeout (60s): VRAM Exceeded or Server Unresponsive (OOM suspected)" : "Timeout (60s): VRAM 초과 또는 서버 무응답 (OOM 의심)";
                 } else {
                     result.error = e.toString();
                 }
@@ -558,7 +558,7 @@
                 
             } catch (e) {
                 if (e.name === 'AbortError') {
-                    result.error = "Timeout (60s): VRAM 초과 또는 서버 무응답 (OOM 의심)";
+                    result.error = props.config.lang === "en" ? "Timeout (60s): VRAM Exceeded or Server Unresponsive (OOM suspected)" : "Timeout (60s): VRAM 초과 또는 서버 무응답 (OOM 의심)";
                 } else {
                     result.error = e.toString();
                 }
@@ -721,6 +721,23 @@
                         document.getElementById('status-text').innerText = "Ready...";
                         document.getElementById('scan-overlay-text').innerText = "Scanning PC...";
                         document.querySelector('#cors-error-msg h4').innerText = "🚨 Local Model Scan Failed (CORS Error)";
+                        document.querySelector('#cors-error-msg p').innerHTML = "Server is down or connection blocked by browser security policy (CORS).<br><strong>Please follow the instructions below to allow CORS for the program you are using.</strong>";
+                        document.querySelector('#cors-error-msg > div').innerHTML = `
+                            <div style="margin-bottom: 12px;">
+                                <strong style="color:#4F46E5;">🦙 1. Ollama</strong><br>
+                                <span style="color:#6B7280; font-size:12px;">(※ Must fully 'Quit Ollama' from tray/menu bar and restart after setting)</span><br>
+                                <b>🖥️ Windows:</b> Edit System Environment Variables -> [New] Variable <code>OLLAMA_ORIGINS</code> / Value <code>*</code><br>
+                                <b>🍎 Mac:</b> Run <code>launchctl setenv OLLAMA_ORIGINS "*"</code> in terminal
+                            </div>
+                            <div style="margin-bottom: 12px;">
+                                <strong style="color:#4F46E5;">🤖 2. LM Studio (Win/Mac)</strong><br>
+                                Go to [Local Server] tab -> Turn on <b>Cross-Origin-Resource-Sharing (CORS)</b> toggle in the right panel
+                            </div>
+                            <div>
+                                <strong style="color:#4F46E5;">⚡ 3. vLLM / oMLX (Terminal)</strong><br>
+                                Add <code>--cors-allowed-origins "*"</code> option to the server run command
+                            </div>
+                        `;
                     }
                     
                     sendMessageToStreamlitClient("streamlit:componentReady", {apiVersion: 1});
